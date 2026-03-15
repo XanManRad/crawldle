@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crawl-dle | Daily RC Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
         /* 🌲 MUD, ROCK, & PINE THEME 🌲 */
         body { 
@@ -142,9 +142,25 @@
             margin-top: 10px; 
         }
 
+        /* 🏁 BOX ANIMATION - STAGGERED SLIDE UP & FADE 🏁 */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .box.animate {
+            animation: slideUpFade 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
         .box { 
             padding: 15px 5px; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -152,22 +168,44 @@
             font-weight: bold; 
             text-align: center; 
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(145deg, #383e42, #24282a); 
-            border: 2px solid #1a1c1d;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.1);
-            text-shadow: 1px 1px 2px #000;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+            border: 2px solid #4a4a4a;
+            box-shadow: 0px 6px 12px rgba(0,0,0,0.8), inset 0px 1px 0px rgba(255,255,255,0.05);
+            text-shadow: 1px 1px 3px #000;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .correct { 
-            background: linear-gradient(145deg, #3b8c2a, #265c1b) !important; 
-            border-color: #193d11 !important;
-            color: white; 
+            background: linear-gradient(135deg, #2d7c2d 0%, #1f5c1f 100%) !important; 
+            border-color: #4a9d4a !important;
+            color: #e8f5e9;
+            box-shadow: 0px 6px 12px rgba(45, 124, 45, 0.5), inset 0px 1px 0px rgba(255,255,255,0.1) !important;
         } 
         
         .wrong { 
-            background: linear-gradient(145deg, #a83232, #702020) !important; 
-            border-color: #4a1515 !important;
-            color: white; 
+            background: linear-gradient(135deg, #8b3a3a 0%, #5a2121 100%) !important; 
+            border-color: #c04444 !important;
+            color: #fde4e4;
+            box-shadow: 0px 6px 12px rgba(139, 58, 58, 0.5), inset 0px 1px 0px rgba(255,255,255,0.05) !important;
         }
 
         /* 🏆 MODAL STYLES (Game Over Screen) 🏆 */
@@ -181,17 +219,17 @@
         }
         .modal-content {
             background-color: #2c251d;
-            margin: 15% auto; 
+            margin: 10% auto 20% auto; 
             padding: 30px; 
             border: 4px solid #f39c12;
-            width: 80%; 
-            max-width: 400px;
+            width: 85%; 
+            max-width: 380px;
             border-radius: 10px;
             text-align: center;
             box-shadow: 0px 0px 30px rgba(243, 156, 18, 0.4);
         }
-        .modal-content h2 { color: #f39c12; margin-top: 0; font-size: 2em;}
-        .modal-content p { font-family: 'Segoe UI', sans-serif; font-size: 18px;}
+        .modal-content h2 { color: #f39c12; margin-top: 0; font-size: 2em; margin-bottom: 15px;}
+        .modal-content p { font-family: 'Segoe UI', sans-serif; font-size: 18px; margin-bottom: 15px;}
         
         #shareBtn {
             background-color: #f39c12;
@@ -213,7 +251,8 @@
         /* 📱 MOBILE RESPONSIVENESS & SCROLLING (UPDATED FOR BIG PHONES) 📱 */
         .grid-wrapper {
             width: 100%;
-            overflow-x: auto; 
+            overflow-x: auto;
+            overflow-y: hidden;
             padding-bottom: 12px; 
             -webkit-overflow-scrolling: touch; 
         }
@@ -265,8 +304,9 @@
             }
             .modal-content { 
                 width: 90%; 
-                padding: 25px; 
-                margin: 25% auto;
+                padding: 20px; 
+                margin: 15% auto 25% auto;
+                max-width: 360px;
             }
             .grid-header, .guess-row {
                 min-width: 750px;
@@ -318,15 +358,16 @@
             
             .modal-content { 
                 width: 92%; 
-                padding: 20px;
-                margin: 30% auto;
+                padding: 18px;
+                margin: 20% auto 30% auto;
+                max-width: 320px;
             }
             .modal-content h2 {
-                font-size: 1.5em;
-                margin-bottom: 10px;
+                font-size: 1.4em;
+                margin-bottom: 12px;
             }
             .modal-content p {
-                font-size: 15px;
+                font-size: 14px;
                 margin-bottom: 15px;
             }
             #shareBtn {
@@ -589,17 +630,24 @@
         if (guessesCount >= maxGuesses) return; // Prevent extra guesses
 
         guessesCount++;
-        renderGuess(inputVal, guess);
-        inputField.value = '';
-
+        
+        // Determine if this is a game-ending guess
+        let isGameEnding = false;
+        let isWin = false;
+        
         if (inputVal === dailyAnswerName) {
-            endGame(true);
+            isGameEnding = true;
+            isWin = true;
         } else if (guessesCount >= maxGuesses) {
-            endGame(false);
+            isGameEnding = true;
+            isWin = false;
         }
+        
+        renderGuess(inputVal, guess, isGameEnding, isWin);
+        inputField.value = '';
     }
 
-    function renderGuess(name, guess) {
+    function renderGuess(name, guess, isGameEnding = false, isWin = false) {
         const board = document.getElementById('gameBoard');
         const row = document.createElement('div');
         row.className = 'guess-row';
@@ -625,7 +673,7 @@
         }
 
         row.innerHTML = `
-            <div class="box" style="background-color: #444; font-size: 12px; color: #fff;">${name}</div>
+            <div class="box" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${name}</div>
             ${checkTrait(guess.brand, answer.brand)}
             ${checkTrait(guess.scale, answer.scale, true)}
             ${checkTrait(guess.axles, answer.axles)}
@@ -636,6 +684,57 @@
         `;
         
         board.appendChild(row);
+        
+        // Animate boxes one by one with staggered delay
+        const boxes = row.querySelectorAll('.box');
+        const gridWrapper = document.querySelector('.grid-wrapper');        
+        // Reset scroll to left before animation starts
+        gridWrapper.scrollLeft = 0;
+        const totalAnimationDuration = (boxes.length - 1) * 550 + 550;
+        
+        // Calculate if scrolling is needed
+        const maxScroll = gridWrapper.scrollWidth - gridWrapper.clientWidth;
+        
+        if (maxScroll > 0) {
+            // Calculate what percentage of content fits on screen without scrolling
+            const visiblePercentage = gridWrapper.clientWidth / gridWrapper.scrollWidth;
+            // Start scrolling BEFORE boxes overflow (with a buffer of ~1 box duration)
+            const scrollStartTime = Math.max(0, (visiblePercentage * totalAnimationDuration) - 550);
+            
+            const animationStartTime = Date.now();
+            
+            const animateScroll = () => {
+                const elapsed = Date.now() - animationStartTime;
+                
+                // Start scrolling earlier so new boxes are visible as they animate in
+                if (elapsed >= scrollStartTime) {
+                    const scrollElapsed = elapsed - scrollStartTime;
+                    const remainingDuration = totalAnimationDuration - scrollStartTime;
+                    const progress = Math.min(scrollElapsed / remainingDuration, 1);
+                    gridWrapper.scrollLeft = progress * maxScroll;
+                }
+                
+                if (elapsed < totalAnimationDuration) {
+                    requestAnimationFrame(animateScroll);
+                }
+            };
+            
+            requestAnimationFrame(animateScroll);
+        }
+        
+        boxes.forEach((box, index) => {
+            setTimeout(() => {
+                box.classList.add('animate');
+            }, index * 550); // 550ms (0.55 second) stagger between each box
+        });
+        
+        // If this is a game-ending guess, trigger endGame after all animations complete
+        if (isGameEnding) {
+            setTimeout(() => {
+                endGame(isWin);
+            }, totalAnimationDuration);
+        }
+        
         guessHistoryEmoji.push(rowEmojis); // Save the emoji string to our global array
     }
 
