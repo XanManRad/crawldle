@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crawl-dle | Daily RC Game</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        
         /* 🌲 MUD, ROCK, & PINE THEME 🌲 */
         body { 
             font-family: 'Impact', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -22,11 +24,27 @@
 
         h1 { 
             color: #f39c12; 
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
             font-size: 3.5em;
             margin-bottom: 0px;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 4px 4px 0px #000, 6px 6px 15px rgba(243, 156, 18, 0.4);
+        }
+        
+        .d-letter {
+            color: #FFC700; /* Yellow */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+        
+        .l-letter {
+            color: #FF8C00; /* Orange */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+        
+        .e-letter {
+            color: #E63946; /* Red */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
         }
 
         .subtitle { 
@@ -359,7 +377,7 @@
 <body>
 
 <div class="container">
-    <h1>Crawl-dle</h1>
+    <h1>Crawl<span class="d-letter">d</span><span class="l-letter">l</span><span class="e-letter">e</span></h1>
     <p class="subtitle">🛻 Guess the crawler of the day!</p>
     
     <div class="search-container">
