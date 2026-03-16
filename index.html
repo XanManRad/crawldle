@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2NX27LWGP2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2NX27LWGP2');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crawl-dle | Daily RC Game</title>
     <style>
+         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        
         /* 🌲 MUD, ROCK, & PINE THEME 🌲 */
         body { 
             font-family: 'Impact', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -22,22 +33,43 @@
 
         h1 { 
             color: #f39c12; 
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
             font-size: 3.5em;
             margin-bottom: 0px;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 4px 4px 0px #000, 6px 6px 15px rgba(243, 156, 18, 0.4);
         }
+        
+        .d-letter {
+            color: #FFC700; /* Yellow */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+        
+        .l-letter {
+            color: #FF8C00; /* Orange */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+        
+        .e-letter {
+            color: #E63946; /* Red */
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        }
 
         .subtitle { 
             font-size: 18px; 
             color: #8c9b78; 
             margin-top: 5px; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 2px 2px 4px #000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #countdown {
+            font-family: 'Courier New', monospace;
         }
 
         .container { 
@@ -115,6 +147,7 @@
             text-transform: uppercase;
             border-bottom: 2px solid #3c4a28;
             padding-bottom: 10px;
+            font-family: 'Courier New', monospace;
         }
 
         .guess-row { 
@@ -124,9 +157,25 @@
             margin-top: 10px; 
         }
 
+        /* 🏁 BOX ANIMATION - STAGGERED SLIDE UP & FADE 🏁 */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .box.animate {
+            animation: slideUpFade 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
         .box { 
             padding: 15px 5px; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -134,22 +183,44 @@
             font-weight: bold; 
             text-align: center; 
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(145deg, #383e42, #24282a); 
-            border: 2px solid #1a1c1d;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.1);
-            text-shadow: 1px 1px 2px #000;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+            border: 2px solid #4a4a4a;
+            box-shadow: 0px 6px 12px rgba(0,0,0,0.8), inset 0px 1px 0px rgba(255,255,255,0.05);
+            text-shadow: 1px 1px 3px #000;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .correct { 
-            background: linear-gradient(145deg, #3b8c2a, #265c1b) !important; 
-            border-color: #193d11 !important;
-            color: white; 
+            background: linear-gradient(135deg, #2d7c2d 0%, #1f5c1f 100%) !important; 
+            border-color: #4a9d4a !important;
+            color: #e8f5e9;
+            box-shadow: 0px 6px 12px rgba(45, 124, 45, 0.5), inset 0px 1px 0px rgba(255,255,255,0.1) !important;
         } 
         
         .wrong { 
-            background: linear-gradient(145deg, #a83232, #702020) !important; 
-            border-color: #4a1515 !important;
-            color: white; 
+            background: linear-gradient(135deg, #8b3a3a 0%, #5a2121 100%) !important; 
+            border-color: #c04444 !important;
+            color: #fde4e4;
+            box-shadow: 0px 6px 12px rgba(139, 58, 58, 0.5), inset 0px 1px 0px rgba(255,255,255,0.05) !important;
         }
 
         /* 🏆 MODAL STYLES (Game Over Screen) 🏆 */
@@ -163,17 +234,17 @@
         }
         .modal-content {
             background-color: #2c251d;
-            margin: 15% auto; 
+            margin: 10% auto 20% auto; 
             padding: 30px; 
             border: 4px solid #f39c12;
-            width: 80%; 
-            max-width: 400px;
+            width: 85%; 
+            max-width: 380px;
             border-radius: 10px;
             text-align: center;
             box-shadow: 0px 0px 30px rgba(243, 156, 18, 0.4);
         }
-        .modal-content h2 { color: #f39c12; margin-top: 0; font-size: 2em;}
-        .modal-content p { font-family: 'Segoe UI', sans-serif; font-size: 18px;}
+        .modal-content h2 { color: #f39c12; margin-top: 0; font-size: 2em; margin-bottom: 15px;}
+        .modal-content p { font-family: 'Segoe UI', sans-serif; font-size: 18px; margin-bottom: 15px;}
         
         #shareBtn {
             background-color: #f39c12;
@@ -195,7 +266,8 @@
         /* 📱 MOBILE RESPONSIVENESS & SCROLLING (UPDATED FOR BIG PHONES) 📱 */
         .grid-wrapper {
             width: 100%;
-            overflow-x: auto; 
+            overflow-x: auto;
+            overflow-y: hidden;
             padding-bottom: 12px; 
             -webkit-overflow-scrolling: touch; 
         }
@@ -216,8 +288,12 @@
                 text-shadow: 2px 2px 0px #000, 3px 3px 10px rgba(243, 156, 18, 0.4); 
             }
             .subtitle { 
-                font-size: 14px; 
-                margin-bottom: 20px; 
+                font-size: 16px; 
+                margin-bottom: 12px; 
+            }
+            #countdown {
+                font-size: 12px;
+                margin: -8px 0 15px 0 !important;
             }
             .container { 
                 padding: 15px; 
@@ -247,8 +323,9 @@
             }
             .modal-content { 
                 width: 90%; 
-                padding: 25px; 
-                margin: 25% auto;
+                padding: 20px; 
+                margin: 15% auto 25% auto;
+                max-width: 360px;
             }
             .grid-header, .guess-row {
                 min-width: 750px;
@@ -263,8 +340,12 @@
                 text-shadow: 2px 2px 0px #000, 3px 3px 8px rgba(243, 156, 18, 0.3); 
             }
             .subtitle { 
-                font-size: 12px; 
-                margin-bottom: 15px; 
+                font-size: 14px; 
+                margin-bottom: 10px; 
+            }
+            #countdown {
+                font-size: 11px;
+                margin: -6px 0 15px 0 !important;
             }
             
             .container { 
@@ -300,15 +381,16 @@
             
             .modal-content { 
                 width: 92%; 
-                padding: 20px;
-                margin: 30% auto;
+                padding: 18px;
+                margin: 20% auto 30% auto;
+                max-width: 320px;
             }
             .modal-content h2 {
-                font-size: 1.5em;
-                margin-bottom: 10px;
+                font-size: 1.4em;
+                margin-bottom: 12px;
             }
             .modal-content p {
-                font-size: 15px;
+                font-size: 14px;
                 margin-bottom: 15px;
             }
             #shareBtn {
@@ -359,8 +441,9 @@
 <body>
 
 <div class="container">
-    <h1>Crawl-dle</h1>
+    <h1>Crawl<span class="d-letter">d</span><span class="l-letter">l</span><span class="e-letter">e</span></h1>
     <p class="subtitle">🛻 Guess the crawler of the day!</p>
+    <p id="countdown" style="font-size: 14px; color: #a4b391; margin: -15px 0 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Next rig in: <span id="countdownHours" style="color: #FFC700;">--</span>:<span id="countdownMinutes" style="color: #FF8C00;">--</span>:<span id="countdownSeconds" style="color: #E63946;">--</span></p>
     
     <div class="search-container">
         <input type="text" id="guessInput" placeholder="Start typing a crawler model..." autocomplete="off">
@@ -395,117 +478,116 @@
     // 1. The ULTIMATE Crawler Database
     const crawlerDB = {
         // --- TRAXXAS ---
-        "TRX-4 Defender": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2017 },
-        "TRX-4 Bronco": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2018 },
-        "TRX-4 K5 Blazer": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2019 },
-        "TRX-4 Sport": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 399, year: 2018 },
-        "TRX-4 High Trail F-150": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2023 },
-        "TRX-4 Nissan Pathfinder": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2025 },
-        "TRX-6 Mercedes G 63": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 649, year: 2019 },
-        "TRX-6 Ultimate RC Hauler": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 649, year: 2022 },
-        "TRX-4M Bronco": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
-        "TRX-4M Defender": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
-        "TRX-4M High Trail K10": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2023 },
-        "TRX-4MT Monster Truck": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 149, year: 2024 },
+        "Traxxas TRX-4 Defender": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2017 },
+        "Traxxas TRX-4 Bronco": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2018 },
+        "Traxxas TRX-4 K5 Blazer": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2019 },
+        "Traxxas TRX-4 Sport": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 349, year: 2018 },
+        "Traxxas TRX-4 Crawler Kit": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 399, year: 2018 },
+        "Traxxas TRX-4 High Trail F-150": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2023 },
+        "Traxxas TRX-4 Nissan Pathfinder": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2025 },
+        "Traxxas TRX-6 Mercedes G 63": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 699, year: 2019 },
+        "Traxxas TRX-6 Flatbed Hauler": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 749, year: 2022 },
+        "Traxxas TRX-4M Bronco": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 179, year: 2022 },
+        "Traxxas TRX-4M High Trail K10": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 199, year: 2023 },
 
         // --- AXIAL ---
-        "SCX10 II Cherokee": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 349, year: 2016 },
-        "SCX10 III Jeep JLU": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2020 },
-        "SCX10 III Jeep CJ-7": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2023 },
-        "SCX10 III Base Camp": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 389, year: 2022 },
-        "SCX10 III Base Camp SR5": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
-        "SCX10 III Early Ford Bronco": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2021 },
-        "SCX10 Pro": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 399, year: 2023 },
-        "SCX6 Jeep JLU": { brand: "Axial", scale: 6, axles: "Straight", licensed: "Yes", build: "RTR", price: 1099, year: 2021 },
-        "UTB18 Capra": { brand: "Axial", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 249, year: 2022 },
-        "SCX24 Deadbolt": { brand: "Axial", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 119, year: 2019 },
-        "SCX24 C10": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 124, year: 2021 },
-        "SCX24 Bronco": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 134, year: 2021 },
-        "SCX24 Power Wagon": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
-        "SCX24 Lexus GX 470": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2024 },
-        "SCX30 Ford Bronco": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
-        "SCX30 Jeep Wrangler": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
-        "SCX30 Chevy K10": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
+        "Axial SCX10 II Cherokee": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 409, year: 2016 },
+        "Axial SCX10 II Deadbolt": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 299, year: 2016 },
+        "Axial SCX10 II Trail Honcho": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 329, year: 2017 },
+        "Axial SCX10 III Jeep JLU": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 629, year: 2020 },
+        "Axial SCX10 III Coyote": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2025 },
+        "Axial SCX10 III Jeep CJ-7": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2023 },
+        "Axial SCX10 III Builder's Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "Kit", price: 269, year: 2026 },
+        "Axial SCX10 III Jeep JT Gladiator": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 579, year: 2020 },
+        "Axial SCX10 III Jeep JLU Wrangler": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2020 },
+        "Axial SCX10 III Base Camp": { brand: "Axial", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2022 },
+        "Axial SCX10 III Toyota SR5": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2026 },
+        "Axial SCX10 III Early Ford Bronco": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2021 },
+        "Axial SCX10 II UMG10 6x6": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 449, year: 2019 },
+        "Axial SCX10 Pro 4x4 Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 429, year: 2023 },
+        "Axial SCX6 Jeep JLU Wrangler": { brand: "Axial", scale: 6, axles: "Straight", licensed: "Yes", build: "RTR", price: 1199, year: 2021 },
+        "Axial UTB18 Capra": { brand: "Axial", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 279, year: 2022 },
+        "Axial SCX6 Trail Honcho": { brand: "Axial", scale: 6, axles: "Straight", licensed: "No", build: "RTR", price: 1199, year: 2022 },
+        "Axial SCX24 Deadbolt": { brand: "Axial", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 124, year: 2019 },
+        "Axial SCX24 Bronco": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 129, year: 2021 },
+        "Axial SCX24 Power Wagon": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
+        "Axial SCX24 Lexus GX 470": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2024 },
+        "Axial SCX24 Jeep Gladiator": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
+        "Axial SCX30 Ford Bronco": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
+        "Axial SCX30 Jeep Wrangler": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
+        "Axial SCX30 Chevy K10": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2026 },
 
         // --- REDCAT ---
-        "Redcat Ascent 18": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 119, year: 2024 },
-        "Redcat Ascent 18 Apex": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 129, year: 2025 },
-        "Redcat Ascent 1/10": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 289, year: 2023 },
-        "Redcat Ascent Fusion": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 399, year: 2023 },
-        "Gen8 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 299, year: 2018 },
-        "Gen8 V2 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 339, year: 2020 },
-        "Gen9 Scout 800A": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2023 },
-        "Danchee Ridgerock": { brand: "Redcat", scale: 10, axles: "MOA", licensed: "No", build: "RTR", price: 129, year: 2018 },
-        "Marksman 1/8": { brand: "Redcat", scale: 8, axles: "Straight", licensed: "No", build: "RTR", price: 449, year: 2021 },
+        "Redcat Ascent 18 Apex": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 249, year: 2025 },
+        "Redcat Ascent 1/10": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2023 },
+        "Redcat Ascent Fusion": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 479, year: 2024 },
+        "Redcat Gen8 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 299, year: 2018 },
+        "Redcat Gen8 V2 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 379, year: 2020 },
+        "Redcat Gen9 Scout 800A": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2023 },
+        "Redcat Danchee Ridgerock": { brand: "Danchee", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 159, year: 2018 },
+        "Redcat Marksman 1/8": { brand: "Redcat", scale: 8, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
+        "Redcat Ascent 18 Scout II Brushless": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 199, year: 2025 },
 
         // --- FMS / ROCHOBBY ---
-        "FCX24 Power Wagon": { brand: "FMS", scale: 24, axles: "Portal", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
-        "FCX24 K5 Blazer": { brand: "FMS", scale: 24, axles: "Portal", licensed: "Yes", build: "RTR", price: 149, year: 2023 },
-        "FCX24 Smasher": { brand: "FMS", scale: 24, axles: "Portal", licensed: "No", build: "RTR", price: 139, year: 2022 },
-        "FCX18 LC80 Land Cruiser": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 149, year: 2023 },
-        "FCX18 Chevy K10": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 149, year: 2024 },
-        "FCX18 Hummer EV": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 159, year: 2025 },
-        "FCX10 LC80 Land Cruiser": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
-        "FCX10 K5 Blazer": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
-        "Atlas 6x6": { brand: "FMS", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 169, year: 2021 },
-        "Mashigan": { brand: "FMS", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 329, year: 2023 },
+        "FMS FCX24 Power Wagon": { brand: "FMS", scale: 24, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2022 },
+        "FMS FCX24 Toyota Tacoma": { brand: "FMS", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 139, year: 2024 },
+        "FMS FCX24 K5 Blazer": { brand: "FMS", scale: 24, axles: "Portal", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
+        "FMS FCX24 Smasher": { brand: "FMS", scale: 24, axles: "Portal", licensed: "No", build: "RTR", price: 145, year: 2022 },
+        "FMS FCX18 LC80 Land Cruiser": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
+        "FMS FCX18 Chevy K10": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
+        "FMS FCX18 Hummer EV": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 179, year: 2024 },
+        "FMS FCX10 LC80 Land Cruiser": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 369, year: 2024 },
+        "FMS FCX10 K5 Blazer": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
+        "FMS Atlas 6x6": { brand: "FMS", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 139, year: 2020 },
 
         // --- HOBBYPLUS ---
-        "CR18P EVO PRO": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 149, year: 2024 },
-        "CR18P EVO V2": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 139, year: 2024 },
-        "CR18P EVO Brushless": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 179, year: 2025 },
-        "CR18P Rock Van": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 139, year: 2023 },
-        "CR18P T-Hunter": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 139, year: 2023 },
-        "CR18P Pro Juice Up": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 180, year: 2025 },
-        "CR18 Rushmore": { brand: "HobbyPlus", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 119, year: 2021 },
-        "CR18 Harvest": { brand: "HobbyPlus", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 119, year: 2021 },
-        "CR18 6x6 Rushmore": { brand: "HobbyPlus", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 159, year: 2022 },
-        "CR24 G-Armor": { brand: "HobbyPlus", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 99, year: 2019 },
-        "CR24 Defender": { brand: "HobbyPlus", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 99, year: 2019 },
-        "CR24 Centurion": { brand: "HobbyPlus", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 99, year: 2020 },
+        "HobbyPlus CR18P EVO PRO": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 155, year: 2023 },
+        "HobbyPlus CR18P Rock Van": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 129, year: 2024 },
+        "HobbyPlus CR18P T-Hunter": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 99, year: 2023 },
+        "HobbyPlus CR18P Pro Juice Up": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 189, year: 2024 },
+        "HobbyPlus CR18P Rushmore": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2024 },
 
         // --- RC4WD ---
-        "Trail Finder 2 Mojave": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 399, year: 2012 },
-        "Trail Finder 3": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2022 },
-        "Gelande II D90": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "Kit", price: 399, year: 2013 },
-        "Bully II MOA": { brand: "RC4WD", scale: 10, axles: "MOA", licensed: "No", build: "Kit", price: 349, year: 2015 },
+        "RC4WD Trail Finder 2 Mojave": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2012 },
+        "RC4WD Gelande II D90": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2013 },
+        "RC4WD Trail Finder 2 Toyota 4Runner": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 569, year: 2021 },
+        "RC4WD Trail Finder 2 Toyota Pickup": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 529, year: 2023 },
 
-        // --- ELEMENT RC ---
-        "Enduro Sendero": { brand: "Element", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 349, year: 2019 },
-        "Enduro Ecto": { brand: "Element", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 399, year: 2021 },
-        "Enduro Knightrunner": { brand: "Element", scale: 10, axles: "IFS", licensed: "No", build: "RTR", price: 429, year: 2021 },
-        "Enduro Zuul": { brand: "Element", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 399, year: 2023 },
+        // --- ELEMENT RC (now Associated Electrics) ---
+        "Element RC Enduro Sendero": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 429, year: 2019 }, // DISCONTINUED
+        "Element RC Enduro Ecto": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 }, // DISCONTINUED
+        "Element RC Enduro Knightrunner": { brand: "Element RC", scale: 10, axles: "IFS", licensed: "No", build: "RTR", price: 499, year: 2021 }, // DISCONTINUED
 
         // --- CROSS RC ---
-        "EMO X": { brand: "Cross RC", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2022 },
-        "EMO NT": { brand: "Cross RC", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 399, year: 2023 },
+        "Cross RC EMO X": { brand: "Cross RC", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 599, year: 2022 },
+        "Cross RC EMO NT": { brand: "Cross RC", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
 
         // --- VANQUISH PRODUCTS ---
-        "VS4-10 Origin Classic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 499, year: 2024 },
-        "VS4-10 Origin Classic Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 599, year: 2024 },
-        "VS4-10 Phoenix Portal": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 349, year: 2021 },
-        "VS4-10 Phoenix Straight": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2022 },
-        "VS4-10 Fordyce": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2023 },
-        "VS4-10 Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 749, year: 2018 },
-        "VS4-10 Ultra": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 799, year: 2019 },
-        "VRD Carbon": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 399, year: 2023 },
-        "VRD Stance": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
-        "VRD Mullet": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2024 },
-        "VRD Builders Kit": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 329, year: 2024 },
-        "H10 Optic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2024 },
-        "H10 Origin": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2024 },
+        "Vanquish VS4-10 Origin Classic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 349, year: 2026 },
+        "Vanquish VS4-10 Origin Classic Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 849, year: 2026 },
+        "Vanquish VS4-10 Phoenix Portal": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 419, year: 2022 },
+        "Vanquish VS4-10 Phoenix Straight": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
+        "Vanquish VS4-10 Fordyce": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 459, year: 2023 },
+        "Vanquish VS4-10 Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 699, year: 2019 },
+        "Vanquish VS4-10 Ultra": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 749, year: 2019 },
+        "Vanquish VRD Carbon": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 429, year: 2023 },
+        "Vanquish VRD Stance": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
+        "Vanquish VRD Mullet": { brand: "Vanquish", scale: 10, axles: "Hybrid", licensed: "No", build: "Kit", price: 419, year: 2025 },
+        "Vanquish VRD Builders Kit": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 289, year: 2024 },
+        "Vanquish H10 Optic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 389, year: 2025 },
+        "Vanquish H10 Origin": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 3499, year: 2025 },
 
-        // --- CHINESE / BUDGET / YIKONG / OTHER ---
-        "MN82 Land Cruiser": { brand: "MN Model", scale: 12, axles: "Straight", licensed: "Yes", build: "RTR", price: 65, year: 2024 },
-        "WPL C24": { brand: "WPL", scale: 16, axles: "Straight", licensed: "No", build: "Kit", price: 45, year: 2018 },
-        "RGT EX86190 Rescuer": { brand: "RGT", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 350, year: 2022 },
-        "Yikong YK4102": { brand: "Yikong", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 350, year: 2020 },
-        "Yikong YK4083": { brand: "Yikong", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 450, year: 2022 }
+        // --- BUDGET / CHINESE / OTHER ---
+        "MN Model MN82 Land Cruiser": { brand: "MN Model", scale: 12, axles: "Straight", licensed: "Yes", build: "RTR", price: 89, year: 2024 },
+        "WPL C24": { brand: "WPL", scale: 16, axles: "Straight", licensed: "No", build: "Kit", price: 69, year: 2018 },
+        "RGT EX86190 Rescuer": { brand: "RGT", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 429, year: 2022 },
+        "Yikong YK4102": { brand: "Yikong", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 429, year: 2020 },
+        "Yikong YK4083": { brand: "Yikong", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 529, year: 2022 }
     };
 
     // --- DAILY MIDNIGHT RESET LOGIC ---
     // We set a launch date so "Day 1" is today!
-    const launchDate = new Date("2026-03-14T00:00:00Z");
+    const launchDate = new Date("2026-03-12T00:00:00Z");
     const today = new Date();
     const gameDayNumber = Math.floor((today - launchDate) / (1000 * 60 * 60 * 24)) + 1;
     
@@ -513,6 +595,32 @@
     const dailyIndex = gameDayNumber % allCrawlerKeys.length;
     const dailyAnswerName = allCrawlerKeys[dailyIndex];
     const answer = crawlerDB[dailyAnswerName];
+    
+    // Calculate next reset time (next midnight UTC)
+    function getNextResetTime() {
+        const now = new Date();
+        const nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+        return nextReset;
+    }
+    
+    // Update countdown timer
+    function updateCountdown() {
+        const now = new Date();
+        const nextReset = getNextResetTime();
+        const timeDiff = nextReset - now;
+        
+        const hours = String(Math.floor((timeDiff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+        const minutes = String(Math.floor((timeDiff / (1000 * 60)) % 60)).padStart(2, '0');
+        const seconds = String(Math.floor((timeDiff / 1000) % 60)).padStart(2, '0');
+        
+        document.getElementById('countdownHours').textContent = hours;
+        document.getElementById('countdownMinutes').textContent = minutes;
+        document.getElementById('countdownSeconds').textContent = seconds;
+    }
+    
+    // Update countdown immediately and every second
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 
     let guessesCount = 0;
     const maxGuesses = 5;
@@ -571,17 +679,24 @@
         if (guessesCount >= maxGuesses) return; // Prevent extra guesses
 
         guessesCount++;
-        renderGuess(inputVal, guess);
-        inputField.value = '';
-
+        
+        // Determine if this is a game-ending guess
+        let isGameEnding = false;
+        let isWin = false;
+        
         if (inputVal === dailyAnswerName) {
-            endGame(true);
+            isGameEnding = true;
+            isWin = true;
         } else if (guessesCount >= maxGuesses) {
-            endGame(false);
+            isGameEnding = true;
+            isWin = false;
         }
+        
+        renderGuess(inputVal, guess, isGameEnding, isWin);
+        inputField.value = '';
     }
 
-    function renderGuess(name, guess) {
+    function renderGuess(name, guess, isGameEnding = false, isWin = false) {
         const board = document.getElementById('gameBoard');
         const row = document.createElement('div');
         row.className = 'guess-row';
@@ -607,7 +722,7 @@
         }
 
         row.innerHTML = `
-            <div class="box" style="background-color: #444; font-size: 12px; color: #fff;">${name}</div>
+            <div class="box" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${name}</div>
             ${checkTrait(guess.brand, answer.brand)}
             ${checkTrait(guess.scale, answer.scale, true)}
             ${checkTrait(guess.axles, answer.axles)}
@@ -618,6 +733,57 @@
         `;
         
         board.appendChild(row);
+        
+        // Animate boxes one by one with staggered delay
+        const boxes = row.querySelectorAll('.box');
+        const gridWrapper = document.querySelector('.grid-wrapper');        
+        // Reset scroll to left before animation starts
+        gridWrapper.scrollLeft = 0;
+        const totalAnimationDuration = (boxes.length - 1) * 550 + 550;
+        
+        // Calculate if scrolling is needed
+        const maxScroll = gridWrapper.scrollWidth - gridWrapper.clientWidth;
+        
+        if (maxScroll > 0) {
+            // Calculate what percentage of content fits on screen without scrolling
+            const visiblePercentage = gridWrapper.clientWidth / gridWrapper.scrollWidth;
+            // Start scrolling BEFORE boxes overflow (with a buffer of ~1 box duration)
+            const scrollStartTime = Math.max(0, (visiblePercentage * totalAnimationDuration) - 550);
+            
+            const animationStartTime = Date.now();
+            
+            const animateScroll = () => {
+                const elapsed = Date.now() - animationStartTime;
+                
+                // Start scrolling earlier so new boxes are visible as they animate in
+                if (elapsed >= scrollStartTime) {
+                    const scrollElapsed = elapsed - scrollStartTime;
+                    const remainingDuration = totalAnimationDuration - scrollStartTime;
+                    const progress = Math.min(scrollElapsed / remainingDuration, 1);
+                    gridWrapper.scrollLeft = progress * maxScroll;
+                }
+                
+                if (elapsed < totalAnimationDuration) {
+                    requestAnimationFrame(animateScroll);
+                }
+            };
+            
+            requestAnimationFrame(animateScroll);
+        }
+        
+        boxes.forEach((box, index) => {
+            setTimeout(() => {
+                box.classList.add('animate');
+            }, index * 550); // 550ms (0.55 second) stagger between each box
+        });
+        
+        // If this is a game-ending guess, trigger endGame after all animations complete
+        if (isGameEnding) {
+            setTimeout(() => {
+                endGame(isWin);
+            }, totalAnimationDuration);
+        }
+        
         guessHistoryEmoji.push(rowEmojis); // Save the emoji string to our global array
     }
 
