@@ -51,11 +51,16 @@
             font-size: 18px; 
             color: #8c9b78; 
             margin-top: 5px; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 2px 2px 4px #000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #countdown {
+            font-family: 'Courier New', monospace;
         }
 
         .container { 
@@ -133,6 +138,7 @@
             text-transform: uppercase;
             border-bottom: 2px solid #3c4a28;
             padding-bottom: 10px;
+            font-family: 'Courier New', monospace;
         }
 
         .guess-row { 
@@ -273,8 +279,12 @@
                 text-shadow: 2px 2px 0px #000, 3px 3px 10px rgba(243, 156, 18, 0.4); 
             }
             .subtitle { 
-                font-size: 14px; 
-                margin-bottom: 20px; 
+                font-size: 16px; 
+                margin-bottom: 12px; 
+            }
+            #countdown {
+                font-size: 12px;
+                margin: -8px 0 15px 0 !important;
             }
             .container { 
                 padding: 15px; 
@@ -321,8 +331,12 @@
                 text-shadow: 2px 2px 0px #000, 3px 3px 8px rgba(243, 156, 18, 0.3); 
             }
             .subtitle { 
-                font-size: 12px; 
-                margin-bottom: 15px; 
+                font-size: 14px; 
+                margin-bottom: 10px; 
+            }
+            #countdown {
+                font-size: 11px;
+                margin: -6px 0 15px 0 !important;
             }
             
             .container { 
@@ -420,6 +434,7 @@
 <div class="container">
     <h1>Crawl<span class="d-letter">d</span><span class="l-letter">l</span><span class="e-letter">e</span></h1>
     <p class="subtitle">🛻 Guess the crawler of the day!</p>
+    <p id="countdown" style="font-size: 14px; color: #a4b391; margin: -15px 0 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Next rig in: <span id="countdownHours" style="color: #FFC700;">--</span>:<span id="countdownMinutes" style="color: #FF8C00;">--</span>:<span id="countdownSeconds" style="color: #E63946;">--</span></p>
     
     <div class="search-container">
         <input type="text" id="guessInput" placeholder="Start typing a crawler model..." autocomplete="off">
@@ -572,6 +587,32 @@
     const dailyIndex = gameDayNumber % allCrawlerKeys.length;
     const dailyAnswerName = allCrawlerKeys[dailyIndex];
     const answer = crawlerDB[dailyAnswerName];
+    
+    // Calculate next reset time (next midnight UTC)
+    function getNextResetTime() {
+        const now = new Date();
+        const nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+        return nextReset;
+    }
+    
+    // Update countdown timer
+    function updateCountdown() {
+        const now = new Date();
+        const nextReset = getNextResetTime();
+        const timeDiff = nextReset - now;
+        
+        const hours = String(Math.floor((timeDiff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+        const minutes = String(Math.floor((timeDiff / (1000 * 60)) % 60)).padStart(2, '0');
+        const seconds = String(Math.floor((timeDiff / 1000) % 60)).padStart(2, '0');
+        
+        document.getElementById('countdownHours').textContent = hours;
+        document.getElementById('countdownMinutes').textContent = minutes;
+        document.getElementById('countdownSeconds').textContent = seconds;
+    }
+    
+    // Update countdown immediately and every second
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 
     let guessesCount = 0;
     const maxGuesses = 5;
