@@ -10,9 +10,11 @@
 
   gtag('config', 'G-2NX27LWGP2');
 </script>
+<link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crawl-dle | Daily RC Game</title>
+    <title>Crawldle | Daily RC Game</title>
+    <meta name="description" content="Put your RC crawler knowledge to the test. Identify the mystery rig in 5 guesses or less. New trucks, new challenges, every single day. Play free now.">
     <style>
          @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
@@ -811,7 +813,7 @@
         // Build the text block to copy
         const gameStatus = guessesCount >= maxGuesses && guessHistoryEmoji[guessesCount-1].includes("🟥") ? "X" : guessesCount;
         
-        let shareText = `🛻 Crawl-dle #${gameDayNumber}\n`;
+        let shareText = `🛻 Crawldle #${gameDayNumber}\n`;
         shareText += `Attempts: ${gameStatus}/${maxGuesses}\n\n`;
         shareText += guessHistoryEmoji.join('\n');
         
