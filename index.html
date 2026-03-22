@@ -602,7 +602,7 @@
                 game_status: isWin ? 'won' : (guessesCount >= maxGuesses ? 'lost' : 'incomplete'),
                 first_guess: firstGuess,
                 guesses_order: guessesArray,
-                emoji_grid: guessHistoryEmoji.join('\n'),
+                // emoji_grid: guessHistoryEmoji.join('\n'),
                 time_spent_seconds: Math.floor((Date.now() - gameStartTime) / 1000),
                 device_type: getDeviceType(),
                 browser: browserInfo.browser,
