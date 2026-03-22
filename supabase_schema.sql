@@ -107,11 +107,10 @@ CREATE POLICY "Public can view gameplay sessions"
 ON gameplay_sessions FOR SELECT
 USING (true);
 
--- Restrict INSERT to authenticated requests via Supabase Functions/API
--- This policy prevents direct client inserts while allowing backend functions to write
-CREATE POLICY "Only service role can insert gameplay sessions"
+-- Allow public INSERT (for saving player scores without login)
+CREATE POLICY "Public can insert gameplay sessions"
 ON gameplay_sessions FOR INSERT
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
+WITH CHECK (true);
 
 -- ============================================
 -- AFFILIATE_CLICKS POLICIES
@@ -121,10 +120,10 @@ CREATE POLICY "Public can view affiliate clicks"
 ON affiliate_clicks FOR SELECT
 USING (true);
 
--- Restrict INSERT to authenticated backend requests
-CREATE POLICY "Only service role can insert affiliate clicks"
+-- Allow public INSERT (for tracking clicks)
+CREATE POLICY "Public can insert affiliate clicks"
 ON affiliate_clicks FOR INSERT
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
+WITH CHECK (true);
 
 -- ============================================
 -- DAILY_STATS POLICIES
