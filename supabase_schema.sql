@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS player_streaks (
 CREATE INDEX idx_streak_player_id ON player_streaks(player_id);
 
 -- ============================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES (SECURE VERSION)
 -- ============================================
 
 -- Enable RLS on all tables
@@ -98,42 +98,66 @@ ALTER TABLE affiliate_clicks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE player_streaks ENABLE ROW LEVEL SECURITY;
 
--- Allow anyone to INSERT to gameplay_sessions (anonymous players)
-CREATE POLICY "Allow insert to gameplay_sessions"
-ON gameplay_sessions FOR INSERT
-WITH CHECK (true);
-
--- Allow anyone to SELECT from gameplay_sessions (for leaderboards, etc)
-CREATE POLICY "Allow select from gameplay_sessions"
+-- ============================================
+-- GAMEPLAY_SESSIONS POLICIES
+-- ============================================
+-- Public READ (leaderboards, stats viewing)
+-- Note: USING (true) for SELECT is intentional - for public read access
+CREATE POLICY "Public can view gameplay sessions"
 ON gameplay_sessions FOR SELECT
 USING (true);
 
--- Allow anyone to INSERT to affiliate_clicks
-CREATE POLICY "Allow insert to affiliate_clicks"
+-- Restrict INSERT to authenticated requests via Supabase Functions/API
+-- This policy prevents direct client inserts while allowing backend functions to write
+CREATE POLICY "Only service role can insert gameplay sessions"
+ON gameplay_sessions FOR INSERT
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
+
+-- ============================================
+-- AFFILIATE_CLICKS POLICIES
+-- ============================================
+-- Public READ (for analytics dashboard)
+CREATE POLICY "Public can view affiliate clicks"
+ON affiliate_clicks FOR SELECT
+USING (true);
+
+-- Restrict INSERT to authenticated backend requests
+CREATE POLICY "Only service role can insert affiliate clicks"
 ON affiliate_clicks FOR INSERT
-WITH CHECK (true);
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
 
--- Allow anyone to INSERT to daily_stats (via triggers or API)
-CREATE POLICY "Allow insert to daily_stats"
-ON daily_stats FOR INSERT
-WITH CHECK (true);
-
--- Allow anyone to SELECT from daily_stats
-CREATE POLICY "Allow select from daily_stats"
+-- ============================================
+-- DAILY_STATS POLICIES
+-- ============================================
+-- Public READ (for daily stats display)
+CREATE POLICY "Public can view daily stats"
 ON daily_stats FOR SELECT
 USING (true);
 
--- Allow anyone to INSERT to player_streaks
-CREATE POLICY "Allow insert to player_streaks"
-ON player_streaks FOR INSERT
-WITH CHECK (true);
+-- Restrict INSERT/UPDATE to backend functions only
+CREATE POLICY "Only service role can insert daily stats"
+ON daily_stats FOR INSERT
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
 
--- Allow anyone to UPDATE player_streaks
-CREATE POLICY "Allow update to player_streaks"
-ON player_streaks FOR UPDATE
-USING (true);
+CREATE POLICY "Only service role can update daily stats"
+ON daily_stats FOR UPDATE
+USING (auth.role() = 'service_role' OR current_user = 'postgres')
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
 
--- Allow anyone to SELECT from player_streaks
-CREATE POLICY "Allow select from player_streaks"
+-- ============================================
+-- PLAYER_STREAKS POLICIES
+-- ============================================
+-- Public READ
+CREATE POLICY "Public can view player streaks"
 ON player_streaks FOR SELECT
 USING (true);
+
+-- Restrict INSERT/UPDATE to backend functions only
+CREATE POLICY "Only service role can insert player streaks"
+ON player_streaks FOR INSERT
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
+
+CREATE POLICY "Only service role can update player streaks"
+ON player_streaks FOR UPDATE
+USING (auth.role() = 'service_role' OR current_user = 'postgres')
+WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
