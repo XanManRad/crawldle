@@ -447,6 +447,483 @@
                 min-width: 650px;
             }
         }
+        /* ============================================ */
+        /* 📊 HEADER ICONS                              */
+        /* ============================================ */
+        .header-icons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .header-icon-btn {
+            background: linear-gradient(135deg, #3c4a28 0%, #2a3518 100%);
+            border: 2px solid #5a6b3a;
+            color: #e0dcd3;
+            font-size: 22px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.5);
+        }
+        .header-icon-btn:hover {
+            background: linear-gradient(135deg, #4a5d23 0%, #3c4a28 100%);
+            border-color: #f39c12;
+            transform: scale(1.08);
+            box-shadow: 0 0 12px rgba(243, 156, 18, 0.3);
+        }
+        .header-icon-btn:active { transform: scale(0.95); }
+        .header-icon-btn.logged-in {
+            border-color: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+        }
+
+        /* ============================================ */
+        /* 📊 STATS MODAL                               */
+        /* ============================================ */
+        #statsModal, #authModal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+        .stats-modal-content {
+            background-color: #2c251d;
+            margin: 5% auto 10% auto;
+            padding: 25px 20px;
+            border: 3px solid #f39c12;
+            width: 90%;
+            max-width: 420px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0px 0px 30px rgba(243, 156, 18, 0.3);
+            position: relative;
+        }
+        .stats-close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 28px;
+            color: #8c9b78;
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .stats-close-btn:hover { color: #f39c12; }
+
+        /* Tabs */
+        .stats-tabs {
+            display: flex;
+            border-bottom: 2px solid #3c4a28;
+            margin-bottom: 20px;
+        }
+        .stats-tab {
+            flex: 1;
+            padding: 10px 5px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #8c9b78;
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 1.3em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+        .stats-tab:hover { color: #e0dcd3; }
+        .stats-tab.active {
+            color: #f39c12;
+            border-bottom-color: #f39c12;
+        }
+        .stats-tab-content { display: none; }
+        .stats-tab-content.active { display: block; }
+
+        /* Stat Grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background: linear-gradient(135deg, #1a1714 0%, #221e18 100%);
+            border: 1px solid #3c4a28;
+            border-radius: 8px;
+            padding: 12px 8px;
+        }
+        .stat-value {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 2em;
+            color: #f39c12;
+            line-height: 1;
+        }
+        .stat-label {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #8c9b78;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Guess Distribution */
+        .dist-title {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 1.3em;
+            color: #a4b391;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .dist-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        .dist-label {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #a4b391;
+            width: 16px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .dist-bar-bg {
+            flex: 1;
+            background: #1a1714;
+            border-radius: 4px;
+            height: 22px;
+            overflow: hidden;
+        }
+        .dist-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3c4a28, #4a5d23);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            min-width: 22px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #e0dcd3;
+            transition: width 0.5s ease;
+        }
+        .dist-bar-fill.highlight {
+            background: linear-gradient(90deg, #4a7c20, #6aad30);
+        }
+
+        /* ============================================ */
+        /* 🏆 LEADERBOARD TABLE                         */
+        /* ============================================ */
+        .lb-section-title {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 1.2em;
+            color: #f39c12;
+            text-transform: uppercase;
+            margin: 18px 0 8px 0;
+            letter-spacing: 1px;
+        }
+        .lb-community-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .lb-community-stat {
+            flex: 1;
+            background: linear-gradient(135deg, #1a1714 0%, #221e18 100%);
+            border: 1px solid #3c4a28;
+            border-radius: 8px;
+            padding: 10px 6px;
+        }
+        .lb-community-value {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 1.6em;
+            color: #2ecc71;
+            line-height: 1;
+        }
+        .lb-community-label {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #8c9b78;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+        .lb-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .lb-table th {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #8c9b78;
+            text-transform: uppercase;
+            padding: 6px 4px;
+            border-bottom: 2px solid #3c4a28;
+            text-align: left;
+        }
+        .lb-table td {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            color: #e0dcd3;
+            padding: 7px 4px;
+            border-bottom: 1px solid #2a2218;
+        }
+        .lb-table tr:hover td { background: rgba(60,74,40,0.3); }
+        .lb-rank {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 1.1em;
+            color: #f39c12;
+            width: 30px;
+        }
+        .lb-rank-1 { color: #FFD700; }
+        .lb-rank-2 { color: #C0C0C0; }
+        .lb-rank-3 { color: #CD7F32; }
+        .lb-you td { background: rgba(243, 156, 18, 0.1) !important; border-left: 3px solid #f39c12; }
+        .lb-loading, .lb-empty {
+            color: #8c9b78;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 20px 0;
+        }
+
+        /* ============================================ */
+        /* 👤 AUTH MODAL                                */
+        /* ============================================ */
+        .auth-modal-content {
+            background-color: #2c251d;
+            margin: 10% auto;
+            padding: 30px 25px;
+            border: 3px solid #f39c12;
+            width: 90%;
+            max-width: 380px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0px 0px 30px rgba(243, 156, 18, 0.3);
+            position: relative;
+        }
+        .auth-title {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: 2em;
+            color: #f39c12;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+        .auth-subtitle {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #8c9b78;
+            margin-bottom: 20px;
+        }
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+            background: #fff;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+        .google-btn:hover {
+            border-color: #4285f4;
+            box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
+            transform: scale(1.02);
+        }
+        .google-btn:active { transform: scale(0.98); }
+        .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            color: #5a4b38;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #3c4a28;
+        }
+        .auth-email-section {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s ease;
+        }
+        .auth-email-section.expanded { max-height: 300px; }
+        .auth-expand-btn {
+            background: none;
+            border: 1px solid #3c4a28;
+            color: #8c9b78;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-bottom: 5px;
+        }
+        .auth-expand-btn:hover { border-color: #f39c12; color: #f39c12; }
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 2px solid #5a4b38;
+            background-color: #1a1714;
+            color: #e0dcd3;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            outline: none;
+        }
+        .auth-input:focus {
+            border-color: #f39c12;
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.3);
+        }
+        .auth-input::placeholder { color: #5a4b38; }
+        .auth-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .auth-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Impact', sans-serif;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .auth-btn-primary {
+            background: #f39c12;
+            color: #121212;
+        }
+        .auth-btn-primary:hover { background: #e67e22; transform: scale(1.03); }
+        .auth-btn-secondary {
+            background: #3c4a28;
+            color: #e0dcd3;
+        }
+        .auth-btn-secondary:hover { background: #4a5d23; transform: scale(1.03); }
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-error {
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            min-height: 16px;
+        }
+        .auth-success {
+            color: #2ecc71;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        /* Logged in state */
+        .auth-logged-in {
+            display: none;
+        }
+        .auth-logged-in.active { display: block; }
+        .auth-form-view.hidden { display: none; }
+        .auth-user-info {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+            color: #f39c12;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+        .auth-logout-btn {
+            background: linear-gradient(135deg, #8b3a3a 0%, #5a2121 100%);
+            color: #fde4e4;
+            border: 2px solid #c04444;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Impact', sans-serif;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .auth-logout-btn:hover { transform: scale(1.05); }
+        .auth-logout-btn:active { transform: scale(0.95); }
+
+        /* Mobile adjustments for modals */
+        @media (max-width: 600px) {
+            .stats-modal-content, .auth-modal-content {
+                margin: 3% auto 5% auto;
+                padding: 18px 14px;
+                width: 95%;
+            }
+            .stat-value { font-size: 1.6em; }
+            .stat-label { font-size: 10px; }
+            .stats-tab { font-size: 1.1em; }
+        }
+
+        /* ============================================ */
+        /* 📄 SITE FOOTER                              */
+        /* ============================================ */
+        .site-footer {
+            margin-top: 40px;
+            padding: 20px 16px 24px;
+            border-top: 1px solid #2a2218;
+            text-align: center;
+        }
+        .footer-disclaimer {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            color: #5a4b38;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #5a4b38;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: #f39c12; }
+        .footer-copy {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #3c3428;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -455,6 +932,11 @@
     <h1>Crawl<span class="d-letter">d</span><span class="l-letter">l</span><span class="e-letter">e</span></h1>
     <p class="subtitle">🛻 Guess the crawler of the day!</p>
     <p id="countdown" style="font-size: 14px; color: #a4b391; margin: -15px 0 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Next rig in: <span id="countdownHours" style="color: #FFC700;">--</span>:<span id="countdownMinutes" style="color: #FF8C00;">--</span>:<span id="countdownSeconds" style="color: #E63946;">--</span></p>
+
+    <div class="header-icons">
+        <button class="header-icon-btn" id="statsBtn" onclick="showStatsModal()" title="Statistics">📊</button>
+        <button class="header-icon-btn" id="authBtn" onclick="showAuthModal()" title="Sign In">👤</button>
+    </div>
     
     <div class="search-container">
         <input type="text" id="guessInput" placeholder="Start typing a crawler model..." autocomplete="off">
@@ -489,7 +971,115 @@
             <a id="affiliateLink" href="#" target="_blank" onclick="handleAffiliateClick(event)" style="display: inline-block; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; border: 2px solid #e65100; transition: 0.2s; cursor: pointer; text-transform: uppercase; margin-bottom: 10px;" onmouseover="this.style.backgroundColor='#e65100'" onmouseout="this.style.backgroundColor=''" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
                 🛒 Buy on Amazon
             </a>
-            <p style="font-size: 12px; color: #8c9b78; margin-top: 10px;">As an Amazon Associate, we earn from qualifying purchases</p>
+            <p style="font-size: 12px; color: #8c9b78; margin-top: 10px;">(paid link)</p>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 📊 STATS MODAL                               -->
+<!-- ============================================ -->
+<div id="statsModal">
+    <div class="stats-modal-content">
+        <button class="stats-close-btn" onclick="hideStatsModal()">&times;</button>
+        <div class="stats-tabs">
+            <button class="stats-tab active" onclick="switchStatsTab('yourStats', this)">Your Stats</button>
+            <button class="stats-tab" onclick="switchStatsTab('leaderboard', this)">Leaderboard</button>
+        </div>
+
+        <!-- YOUR STATS TAB -->
+        <div id="yourStatsTab" class="stats-tab-content active">
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statGamesPlayed">0</div>
+                    <div class="stat-label">Played</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statWinPct">0%</div>
+                    <div class="stat-label">Win %</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statCurrentStreak">0</div>
+                    <div class="stat-label">Current Streak</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statMaxStreak">0</div>
+                    <div class="stat-label">Max Streak</div>
+                </div>
+            </div>
+
+            <div class="dist-title">Guess Distribution</div>
+            <div id="guessDistribution">
+                <!-- JS will populate rows -->
+            </div>
+        </div>
+
+        <!-- LEADERBOARD TAB -->
+        <div id="leaderboardTab" class="stats-tab-content">
+            <div class="lb-section-title">Today's Community</div>
+            <div class="lb-community-stats">
+                <div class="lb-community-stat">
+                    <div class="lb-community-value" id="lbAvgGuesses">--</div>
+                    <div class="lb-community-label">Avg Guesses</div>
+                </div>
+                <div class="lb-community-stat">
+                    <div class="lb-community-value" id="lbWinRate">--</div>
+                    <div class="lb-community-label">Win Rate</div>
+                </div>
+                <div class="lb-community-stat">
+                    <div class="lb-community-value" id="lbTotalPlayers">--</div>
+                    <div class="lb-community-label">Players Today</div>
+                </div>
+            </div>
+
+            <div class="lb-section-title">🔥 Streak Kings</div>
+            <div id="lbStreakTable"><p class="lb-loading">Loading...</p></div>
+
+            <div class="lb-section-title">🏆 Most Wins</div>
+            <div id="lbWinsTable"><p class="lb-loading">Loading...</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 👤 AUTH MODAL                                -->
+<!-- ============================================ -->
+<div id="authModal">
+    <div class="auth-modal-content">
+        <button class="stats-close-btn" onclick="hideAuthModal()">&times;</button>
+
+        <!-- FORM VIEW (not logged in) -->
+        <div id="authFormView" class="auth-form-view">
+            <h2 class="auth-title">Join the Trail</h2>
+            <p class="auth-subtitle">Sync stats across devices & compete on leaderboards</p>
+
+            <button class="google-btn" onclick="handleGoogleSignIn()">
+                <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-divider">or use email</div>
+
+            <button class="auth-expand-btn" id="authExpandBtn" onclick="toggleEmailSection()">Email &amp; Password ▼</button>
+
+            <div class="auth-email-section" id="authEmailSection">
+                <input type="email" class="auth-input" id="authEmail" placeholder="Email address">
+                <input type="password" class="auth-input" id="authPassword" placeholder="Password (min 6 chars)">
+                <div class="auth-btn-row">
+                    <button class="auth-btn auth-btn-primary" onclick="handleEmailSignUp()">Sign Up</button>
+                    <button class="auth-btn auth-btn-secondary" onclick="handleEmailLogin()">Log In</button>
+                </div>
+            </div>
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+        </div>
+
+        <!-- LOGGED IN VIEW -->
+        <div id="authLoggedInView" class="auth-logged-in">
+            <h2 class="auth-title">Trail Rider</h2>
+            <p class="auth-subtitle">Your stats are syncing to the cloud ☁️</p>
+            <div class="auth-user-info" id="authUserInfo">user@example.com</div>
+            <button class="auth-logout-btn" onclick="handleLogout()">Log Out</button>
         </div>
     </div>
 </div>
@@ -535,6 +1125,523 @@
     initSupabase();
     setTimeout(initSupabase, 500);
     setTimeout(initSupabase, 1000);
+
+    // ============================================
+    // 📊 LOCAL STATS SYSTEM (localStorage)
+    // ============================================
+    const STATS_KEY = 'crawldle_stats';
+    const GAME_STATE_KEY = 'crawldle_game_state';
+
+    function getDefaultStats() {
+        return { gamesPlayed: 0, wins: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: 0, guessDistribution: { 1:0, 2:0, 3:0, 4:0, 5:0 } };
+    }
+
+    function loadLocalStats() {
+        try {
+            const raw = localStorage.getItem(STATS_KEY);
+            if (raw) return JSON.parse(raw);
+        } catch(e) { console.error('Error loading stats:', e); }
+        return getDefaultStats();
+    }
+
+    function saveLocalStats(stats) {
+        try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+        catch(e) { console.error('Error saving stats:', e); }
+    }
+
+    function updateLocalStats(isWin, numGuesses) {
+        const stats = loadLocalStats();
+        stats.gamesPlayed++;
+        if (isWin) {
+            stats.wins++;
+            stats.guessDistribution[numGuesses] = (stats.guessDistribution[numGuesses] || 0) + 1;
+            // Streak: check if last played day was yesterday or this is first game
+            if (stats.lastPlayedDay === 0 || stats.lastPlayedDay === gameDayNumber - 1) {
+                stats.currentStreak++;
+            } else if (stats.lastPlayedDay !== gameDayNumber) {
+                stats.currentStreak = 1;
+            }
+            if (stats.currentStreak > stats.maxStreak) stats.maxStreak = stats.currentStreak;
+        } else {
+            stats.currentStreak = 0;
+        }
+        stats.lastPlayedDay = gameDayNumber;
+        saveLocalStats(stats);
+        return stats;
+    }
+
+    // ============================================
+    // 💾 GAME STATE PERSISTENCE (page refresh)
+    // ============================================
+    function saveGameState() {
+        const state = {
+            gameDayNumber: gameDayNumber,
+            guesses: guessHistoryArray.slice(),
+            guessesCount: guessesCount,
+            gameOver: inputField ? inputField.disabled : false,
+            isWin: guessHistoryArray.length > 0 && guessHistoryArray[guessHistoryArray.length - 1] === dailyAnswerName
+        };
+        try { localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state)); }
+        catch(e) { console.error('Error saving game state:', e); }
+    }
+
+    function loadGameState() {
+        try {
+            const raw = localStorage.getItem(GAME_STATE_KEY);
+            if (!raw) return null;
+            const state = JSON.parse(raw);
+            if (state.gameDayNumber !== gameDayNumber) {
+                localStorage.removeItem(GAME_STATE_KEY);
+                return null;
+            }
+            return state;
+        } catch(e) {
+            console.error('Error loading game state:', e);
+            return null;
+        }
+    }
+
+    function restoreGameState() {
+        const state = loadGameState();
+        if (!state || !state.guesses || state.guesses.length === 0) return;
+
+        // Rebuild the board silently (no animations)
+        state.guesses.forEach((guessName, index) => {
+            const guess = crawlerDB[guessName];
+            if (!guess) return;
+            guessesCount++;
+            guessHistoryArray.push(guessName);
+
+            // Rebuild the row without animation
+            const board = document.getElementById('gameBoard');
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+            let rowEmojis = "";
+
+            function checkTraitRestore(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
+                let displayTrait = isPrice ? "$" + guessedTrait : guessedTrait;
+                if (guessedTrait === actualTrait) {
+                    rowEmojis += "🟩";
+                    return `<div class="box animate correct">${displayTrait}</div>`;
+                }
+                if (isNumber) {
+                    const arrow = guessedTrait > actualTrait ? "⬇️" : "⬆️";
+                    rowEmojis += arrow;
+                    return `<div class="box animate wrong">${displayTrait} ${arrow}</div>`;
+                }
+                rowEmojis += "🟥";
+                return `<div class="box animate wrong">${displayTrait}</div>`;
+            }
+
+            row.innerHTML = `
+                <div class="box animate" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${guessName}</div>
+                ${checkTraitRestore(guess.brand, answer.brand)}
+                ${checkTraitRestore(guess.scale, answer.scale, true)}
+                ${checkTraitRestore(guess.axles, answer.axles)}
+                ${checkTraitRestore(guess.licensed, answer.licensed)}
+                ${checkTraitRestore(guess.build, answer.build)}
+                ${checkTraitRestore(guess.price, answer.price, true, true)}
+                ${checkTraitRestore(guess.year, answer.year, true)}
+            `;
+            board.appendChild(row);
+            guessHistoryEmoji.push(rowEmojis);
+        });
+
+        // If game was over, lock input and show modal
+        if (state.gameOver) {
+            inputField.disabled = true;
+            // Small delay to let the UI settle
+            setTimeout(() => endGameRestore(state.isWin), 300);
+        }
+    }
+
+    // Separate endGame for restore (no re-saving stats or Supabase)
+    function endGameRestore(isWin) {
+        const modal = document.getElementById("gameOverModal");
+        const title = document.getElementById("modalTitle");
+        const text = document.getElementById("modalText");
+
+        if (isWin) {
+            title.innerText = "TRAIL CLEARED!";
+            title.style.color = "#2ecc71";
+            text.innerText = `You nailed it in ${guessesCount} tries!`;
+        } else {
+            title.innerText = "STUCK IN THE MUD!";
+            title.style.color = "#e74c3c";
+            text.innerText = `Out of guesses. The answer was the ${dailyAnswerName}.`;
+        }
+
+        // Update affiliate section
+        const crawlerNameEl = document.getElementById("crawlerName");
+        const affiliateLinkEl = document.getElementById("affiliateLink");
+        crawlerNameEl.innerText = dailyAnswerName;
+        const hasDirectLink = crawlerAffiliateLinks[dailyAnswerName] && crawlerAffiliateLinks[dailyAnswerName].trim() !== "";
+        const affiliateUrl = hasDirectLink ?
+            crawlerAffiliateLinks[dailyAnswerName] :
+            `https://amazon.com/s?k=${encodeURIComponent(dailyAnswerName + ' upgrades')}&tag=crawldle-20`;
+        affiliateLinkEl.href = affiliateUrl;
+        affiliateLinkEl.innerHTML = hasDirectLink ? "🛒 Buy on Amazon" : "🔧 View Upgrade Parts";
+
+        modal.style.display = "block";
+    }
+
+    // ============================================
+    // 📊 STATS MODAL UI
+    // ============================================
+    function showStatsModal() {
+        renderStatsModal();
+        document.getElementById('statsModal').style.display = 'block';
+    }
+
+    function hideStatsModal() {
+        document.getElementById('statsModal').style.display = 'none';
+    }
+
+    function switchStatsTab(tabName, btnEl) {
+        // Toggle tabs
+        document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+        btnEl.classList.add('active');
+        document.querySelectorAll('.stats-tab-content').forEach(c => c.classList.remove('active'));
+
+        if (tabName === 'yourStats') {
+            document.getElementById('yourStatsTab').classList.add('active');
+        } else {
+            document.getElementById('leaderboardTab').classList.add('active');
+            renderLeaderboardTab();
+        }
+    }
+
+    function renderStatsModal() {
+        const stats = loadLocalStats();
+        document.getElementById('statGamesPlayed').textContent = stats.gamesPlayed;
+        const winPct = stats.gamesPlayed > 0 ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
+        document.getElementById('statWinPct').textContent = winPct + '%';
+        document.getElementById('statCurrentStreak').textContent = stats.currentStreak;
+        document.getElementById('statMaxStreak').textContent = stats.maxStreak;
+
+        // Guess distribution
+        const distContainer = document.getElementById('guessDistribution');
+        const maxCount = Math.max(1, ...Object.values(stats.guessDistribution));
+        let distHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            const count = stats.guessDistribution[i] || 0;
+            const pct = Math.max(5, (count / maxCount) * 100); // min 5% width for visibility
+            const isHighlight = (inputField && inputField.disabled && guessesCount === i && guessHistoryArray[guessesCount-1] === dailyAnswerName);
+            distHTML += `
+                <div class="dist-row">
+                    <div class="dist-label">${i}</div>
+                    <div class="dist-bar-bg">
+                        <div class="dist-bar-fill${isHighlight ? ' highlight' : ''}" style="width: ${pct}%">${count}</div>
+                    </div>
+                </div>`;
+        }
+        distContainer.innerHTML = distHTML;
+    }
+
+    // Close modals on outside click
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'statsModal') hideStatsModal();
+        if (e.target.id === 'authModal') hideAuthModal();
+    });
+
+    // ============================================
+    // 👤 AUTH SYSTEM (Supabase Auth)
+    // ============================================
+    let currentUser = null;
+
+    function showAuthModal() {
+        document.getElementById('authModal').style.display = 'block';
+        document.getElementById('authError').textContent = '';
+        document.getElementById('authSuccess').textContent = '';
+    }
+
+    function hideAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+    }
+
+    function toggleEmailSection() {
+        const section = document.getElementById('authEmailSection');
+        const btn = document.getElementById('authExpandBtn');
+        if (section.classList.contains('expanded')) {
+            section.classList.remove('expanded');
+            btn.innerHTML = 'Email &amp; Password &#9660;';
+        } else {
+            section.classList.add('expanded');
+            btn.innerHTML = 'Email &amp; Password &#9650;';
+        }
+    }
+
+    function updateAuthUI(user) {
+        currentUser = user;
+        const formView = document.getElementById('authFormView');
+        const loggedInView = document.getElementById('authLoggedInView');
+        const authBtn = document.getElementById('authBtn');
+
+        if (user) {
+            formView.classList.add('hidden');
+            loggedInView.classList.add('active');
+            document.getElementById('authUserInfo').textContent = user.user_metadata?.full_name || user.email || 'Crawler';
+            authBtn.classList.add('logged-in');
+            authBtn.title = 'Profile';
+        } else {
+            formView.classList.remove('hidden');
+            loggedInView.classList.remove('active');
+            authBtn.classList.remove('logged-in');
+            authBtn.title = 'Sign In';
+        }
+    }
+
+    async function handleGoogleSignIn() {
+        if (!supabaseClient) {
+            document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
+            return;
+        }
+        const btn = document.querySelector('.google-btn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = 'Connecting...';
+        btn.style.opacity = '0.7';
+        btn.disabled = true;
+
+        try {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) {
+                document.getElementById('authError').textContent = error.message;
+                btn.innerHTML = originalHTML;
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            }
+        } catch(e) {
+            document.getElementById('authError').textContent = 'Sign in failed. Please try again.';
+            btn.innerHTML = originalHTML;
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        }
+    }
+
+    async function handleEmailSignUp() {
+        if (!supabaseClient) {
+            document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
+            return;
+        }
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        document.getElementById('authError').textContent = '';
+        document.getElementById('authSuccess').textContent = '';
+
+        if (!email || !password) {
+            document.getElementById('authError').textContent = 'Please enter email and password.';
+            return;
+        }
+        if (password.length < 6) {
+            document.getElementById('authError').textContent = 'Password must be at least 6 characters.';
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                document.getElementById('authError').textContent = error.message;
+                return;
+            }
+            if (data.user && !data.user.confirmed_at) {
+                document.getElementById('authSuccess').textContent = 'Check your email to confirm your account!';
+            } else if (data.user) {
+                updateAuthUI(data.user);
+                syncLocalToCloud(data.user);
+                hideAuthModal();
+            }
+        } catch(e) {
+            document.getElementById('authError').textContent = 'Sign up failed. Please try again.';
+        }
+    }
+
+    async function handleEmailLogin() {
+        if (!supabaseClient) {
+            document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
+            return;
+        }
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        document.getElementById('authError').textContent = '';
+        document.getElementById('authSuccess').textContent = '';
+
+        if (!email || !password) {
+            document.getElementById('authError').textContent = 'Please enter email and password.';
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                document.getElementById('authError').textContent = error.message;
+                return;
+            }
+            updateAuthUI(data.user);
+            syncLocalToCloud(data.user);
+            hideAuthModal();
+        } catch(e) {
+            document.getElementById('authError').textContent = 'Login failed. Please try again.';
+        }
+    }
+
+    async function handleLogout() {
+        if (!supabaseClient) return;
+        try {
+            await supabaseClient.auth.signOut();
+            updateAuthUI(null);
+            hideAuthModal();
+        } catch(e) {
+            console.error('Logout error:', e);
+        }
+    }
+
+    async function checkAuthState() {
+        if (!supabaseClient) return;
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session?.user) {
+                updateAuthUI(session.user);
+            }
+            // Listen for auth changes (e.g., Google OAuth redirect)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session?.user) {
+                    updateAuthUI(session.user);
+                    syncLocalToCloud(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    updateAuthUI(null);
+                }
+            });
+        } catch(e) {
+            console.error('Auth state check error:', e);
+        }
+    }
+
+    // Sync local stats to Supabase (upsert player_streaks)
+    async function syncLocalToCloud(user) {
+        if (!supabaseClient || !user) return;
+        try {
+            const stats = loadLocalStats();
+            const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous';
+
+            const { error } = await supabaseClient
+                .from('player_streaks')
+                .upsert({
+                    player_id: PLAYER_ID,
+                    user_id: user.id,
+                    username: displayName,
+                    current_streak: stats.currentStreak,
+                    longest_streak: stats.maxStreak,
+                    win_streak: stats.currentStreak,
+                    total_wins: stats.wins,
+                    last_played_date: stats.lastPlayedDay > 0 ? new Date().toISOString().split('T')[0] : null
+                }, { onConflict: 'player_id' });
+
+            if (error) {
+                console.error('Sync error:', error.message);
+            } else {
+                console.log('✅ Stats synced to cloud');
+            }
+        } catch(e) {
+            console.error('Sync failed:', e);
+        }
+    }
+
+    // ============================================
+    // 🏆 LEADERBOARD SYSTEM
+    // ============================================
+    let leaderboardLoaded = false;
+
+    async function renderLeaderboardTab() {
+        fetchDailyCommunityStats();
+        if (!leaderboardLoaded) {
+            await fetchLeaderboard('streak');
+            await fetchLeaderboard('wins');
+            leaderboardLoaded = true;
+        }
+    }
+
+    async function fetchDailyCommunityStats() {
+        if (!supabaseClient) {
+            document.getElementById('lbAvgGuesses').textContent = '--';
+            document.getElementById('lbWinRate').textContent = '--';
+            document.getElementById('lbTotalPlayers').textContent = '--';
+            return;
+        }
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const { data, error } = await supabaseClient
+                .from('gameplay_sessions')
+                .select('guess_count, game_status')
+                .eq('game_date', todayStr);
+
+            if (error || !data || data.length === 0) {
+                document.getElementById('lbAvgGuesses').textContent = '--';
+                document.getElementById('lbWinRate').textContent = '--';
+                document.getElementById('lbTotalPlayers').textContent = '0';
+                return;
+            }
+
+            const total = data.length;
+            const wins = data.filter(d => d.game_status === 'won').length;
+            const avgGuesses = data.reduce((sum, d) => sum + d.guess_count, 0) / total;
+
+            document.getElementById('lbAvgGuesses').textContent = avgGuesses.toFixed(1);
+            document.getElementById('lbWinRate').textContent = Math.round((wins / total) * 100) + '%';
+            document.getElementById('lbTotalPlayers').textContent = total;
+        } catch(e) {
+            console.error('Community stats error:', e);
+        }
+    }
+
+    async function fetchLeaderboard(type) {
+        if (!supabaseClient) {
+            const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
+            document.getElementById(containerId).innerHTML = '<p class="lb-empty">Sign in to see leaderboards</p>';
+            return;
+        }
+        try {
+            const column = type === 'streak' ? 'current_streak' : 'total_wins';
+            const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
+
+            const { data, error } = await supabaseClient
+                .from('player_streaks')
+                .select('player_id, username, current_streak, longest_streak, total_wins')
+                .not('username', 'is', null)
+                .order(column, { ascending: false })
+                .limit(50);
+
+            if (error) {
+                document.getElementById(containerId).innerHTML = '<p class="lb-empty">Could not load leaderboard</p>';
+                console.error('Leaderboard error:', error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                document.getElementById(containerId).innerHTML = '<p class="lb-empty">No data yet — be the first!</p>';
+                return;
+            }
+
+            let html = '<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>' +
+                (type === 'streak' ? 'Streak' : 'Wins') + '</th></tr></thead><tbody>';
+
+            data.forEach((row, i) => {
+                const isYou = row.player_id === PLAYER_ID;
+                const rankClass = i === 0 ? 'lb-rank-1' : (i === 1 ? 'lb-rank-2' : (i === 2 ? 'lb-rank-3' : ''));
+                const rowClass = isYou ? 'lb-you' : '';
+                const value = type === 'streak' ? row.current_streak : row.total_wins;
+                const displayName = row.username || 'Anonymous';
+                html += `<tr class="${rowClass}"><td class="lb-rank ${rankClass}">${i + 1}</td><td>${displayName}${isYou ? ' (you)' : ''}</td><td>${value}</td></tr>`;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById(containerId).innerHTML = html;
+        } catch(e) {
+            console.error('Leaderboard fetch error:', e);
+        }
+    }
 
     // Detect device type
     function getDeviceType() {
@@ -889,6 +1996,7 @@
         
         renderGuess(inputVal, guess, isGameEnding, isWin);
         inputField.value = '';
+        saveGameState(); // Persist game state for page refresh
     }
 
     function renderGuess(name, guess, isGameEnding = false, isWin = false) {
@@ -1153,6 +2261,15 @@
             currentGameSessionId = sessionId;
             console.log('Game session saved with ID:', sessionId);
         });
+
+        // Update local stats & persist game state
+        updateLocalStats(isWin, guessesCount);
+        saveGameState();
+
+        // Sync to cloud if logged in
+        if (currentUser) {
+            syncLocalToCloud(currentUser);
+        }
         
         setTimeout(() => { modal.style.display = "block"; }, 500);
     }
@@ -1181,7 +2298,25 @@
             alert("Oops! Couldn't copy to clipboard.");
         });
     }
+
+    // ============================================
+    // 🚀 PAGE LOAD: Restore game state & check auth
+    // ============================================
+    restoreGameState();
+    // Check auth after Supabase is ready
+    setTimeout(checkAuthState, 1200);
+
 </script>
+
+<footer class="site-footer">
+    <p class="footer-disclaimer">As an Amazon Associate I earn from qualifying purchases.</p>
+    <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="mailto:support@crawldle.com">Contact</a>
+    </div>
+    <p class="footer-copy">&copy; 2026 Crawldle. All rights reserved.</p>
+</footer>
 
 </body>
 </html>

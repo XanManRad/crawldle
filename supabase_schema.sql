@@ -160,3 +160,88 @@ CREATE POLICY "Only service role can update player streaks"
 ON player_streaks FOR UPDATE
 USING (auth.role() = 'service_role' OR current_user = 'postgres')
 WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
+
+-- ============================================
+-- 🔄 MIGRATION: Stats, Auth & Leaderboards
+-- Run these AFTER the initial schema above
+-- ============================================
+
+-- Table 5: PROFILES (linked to Supabase Auth)
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+    username TEXT UNIQUE,
+    avatar_url TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- Add columns to player_streaks for auth linkage & leaderboards
+ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES profiles(id);
+ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS username TEXT;
+ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS total_wins INTEGER DEFAULT 0;
+
+-- Index for leaderboard queries
+CREATE INDEX IF NOT EXISTS idx_streak_total_wins ON player_streaks(total_wins DESC);
+CREATE INDEX IF NOT EXISTS idx_streak_current ON player_streaks(current_streak DESC);
+
+-- ============================================
+-- PROFILES RLS POLICIES
+-- ============================================
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read profiles (for leaderboard display names)
+CREATE POLICY "Public can view profiles"
+ON profiles FOR SELECT
+USING (true);
+
+-- Users can insert their own profile
+CREATE POLICY "Users can insert own profile"
+ON profiles FOR INSERT
+WITH CHECK (auth.uid() = id);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile"
+ON profiles FOR UPDATE
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+-- ============================================
+-- UPDATED PLAYER_STREAKS POLICIES
+-- (Allow anon users to upsert via frontend)
+-- ============================================
+
+-- Drop existing restrictive insert/update policies
+DROP POLICY IF EXISTS "Only service role can insert player streaks" ON player_streaks;
+DROP POLICY IF EXISTS "Only service role can update player streaks" ON player_streaks;
+
+-- Allow public insert (for saving streaks from frontend)
+CREATE POLICY "Public can insert player streaks"
+ON player_streaks FOR INSERT
+WITH CHECK (true);
+
+-- Allow public update (for upserting streaks from frontend)
+CREATE POLICY "Public can update player streaks"
+ON player_streaks FOR UPDATE
+USING (true)
+WITH CHECK (true);
+
+-- ============================================
+-- AUTO-CREATE PROFILE ON SIGNUP (Trigger)
+-- ============================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, username, avatar_url)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
+        NEW.raw_user_meta_data->>'avatar_url'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Drop trigger if exists, then create
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
