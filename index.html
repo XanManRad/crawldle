@@ -1735,6 +1735,19 @@
     </div>
 
     <script>
+    (function() {
+        'use strict';
+
+        // HTML entity escaping for defense-in-depth XSS protection
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // ============================================
         // SUPABASE CONFIGURATION (Safe initialization)
         // ============================================
@@ -1761,7 +1774,14 @@
             if (!PLAYER_ID) {
                 let playerId = localStorage.getItem('crawldle_player_id');
                 if (!playerId) {
-                    playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    // Use crypto-secure random for player ID generation
+                    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                        playerId = 'player_' + crypto.randomUUID();
+                    } else {
+                        const arr = new Uint8Array(16);
+                        crypto.getRandomValues(arr);
+                        playerId = 'player_' + Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+                    }
                     localStorage.setItem('crawldle_player_id', playerId);
                 }
                 PLAYER_ID = playerId;
@@ -1869,7 +1889,7 @@
                 let rowEmojis = "";
 
                 function checkTraitRestore(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
-                    let displayTrait = isPrice ? "$" + guessedTrait : guessedTrait;
+                    let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
                     if (guessedTrait === actualTrait) {
                         rowEmojis += "🟩";
                         return `<div class="box animate correct">${displayTrait}</div>`;
@@ -1884,7 +1904,7 @@
                 }
 
                 row.innerHTML = `
-                <div class="box animate" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${guessName}</div>
+                <div class="box animate" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${escapeHTML(guessName)}</div>
                 ${checkTraitRestore(guess.brand, answer.brand)}
                 ${checkTraitRestore(guess.scale, answer.scale, true)}
                 ${checkTraitRestore(guess.axles, answer.axles)}
@@ -2193,6 +2213,10 @@
         async function syncLocalToCloud(user) {
             if (!supabaseClient || !user) return;
             try {
+                // Re-validate session before writing to DB
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session || session.user.id !== user.id) return;
+
                 const stats = loadLocalStats();
                 const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous';
 
@@ -2372,6 +2396,7 @@
 
                 const sessionData = {
                     player_id: PLAYER_ID,
+                    user_id: currentUser?.id || null,
                     game_date: new Date().toISOString().split('T')[0],
                     game_number: gameDayNumber,
                     crawler_of_day: dailyAnswerName,
@@ -2558,10 +2583,12 @@
         const estToday = new Date(estDateStr + 'T00:00:00');
         const gameDayNumber = Math.floor((estToday - launchDate) / (1000 * 60 * 60 * 24)) + 1;
 
-        // Seeded random function - same seed always produces same random number
+        // Mulberry32 seeded PRNG - uniform distribution, deterministic
         function seededRandom(seed) {
-            const x = Math.sin(seed) * 10000;
-            return x - Math.floor(x);
+            let t = (seed + 0x6D2B79F5) | 0;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
         }
 
         const allCrawlerKeys = Object.keys(crawlerDB);
@@ -2687,7 +2714,7 @@
             let rowEmojis = ""; // Temporary string for this row's emojis
 
             function checkTrait(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
-                let displayTrait = isPrice ? "$" + guessedTrait : guessedTrait;
+                let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
 
                 if (guessedTrait === actualTrait) {
                     rowEmojis += "🟩";
@@ -2705,7 +2732,7 @@
             }
 
             row.innerHTML = `
-            <div class="box" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${name}</div>
+            <div class="box" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${escapeHTML(name)}</div>
             ${checkTrait(guess.brand, answer.brand)}
             ${checkTrait(guess.scale, answer.scale, true)}
             ${checkTrait(guess.axles, answer.axles)}
@@ -3032,6 +3059,17 @@
                 setUsernameMsg('Sign in first', 'error');
                 return;
             }
+            // Re-validate session before writing
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session || session.user.id !== currentUser.id) {
+                    setUsernameMsg('Session expired, please re-login', 'error');
+                    return;
+                }
+            } catch (e) {
+                setUsernameMsg('Session check failed', 'error');
+                return;
+            }
             const input = document.getElementById('usernameInput');
             const name = input.value.trim();
             if (!name || name.length < 2) {
@@ -3090,6 +3128,26 @@
             setTimeout(showRulesModal, 800);
             localStorage.setItem('crawldle_visited', 'true');
         }
+
+        // Expose functions needed by inline onclick handlers
+        window.showRulesModal = showRulesModal;
+        window.hideRulesModal = hideRulesModal;
+        window.showStatsModal = showStatsModal;
+        window.hideStatsModal = hideStatsModal;
+        window.switchStatsTab = switchStatsTab;
+        window.showAuthModal = showAuthModal;
+        window.hideAuthModal = hideAuthModal;
+        window.handleGoogleSignIn = handleGoogleSignIn;
+        window.toggleEmailSection = toggleEmailSection;
+        window.handleEmailSignUp = handleEmailSignUp;
+        window.handleEmailLogin = handleEmailLogin;
+        window.handleLogout = handleLogout;
+        window.shareResults = shareResults;
+        window.dismissGameOver = dismissGameOver;
+        window.reopenGameOverModal = reopenGameOverModal;
+        window.saveUsername = saveUsername;
+        window.handleAffiliateClick = handleAffiliateClick;
+    })();
 
     </script>
 
