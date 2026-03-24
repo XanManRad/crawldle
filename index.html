@@ -2042,13 +2042,36 @@
             }
         }
 
+        // Store original Google button HTML for reset
+        const googleBtnOriginalHTML = document.querySelector('.google-btn')?.innerHTML || 'Continue with Google';
+
+        function resetGoogleBtn() {
+            const btn = document.querySelector('.google-btn');
+            if (btn) {
+                btn.innerHTML = googleBtnOriginalHTML;
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            }
+        }
+
+        // Reset the Google sign-in button when user returns to the page
+        // (e.g., after cancelling the OAuth flow or pressing back)
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') {
+                resetGoogleBtn();
+            }
+        });
+        // Also reset on window focus (catches more cases like popup close)
+        window.addEventListener('focus', function () {
+            resetGoogleBtn();
+        });
+
         async function handleGoogleSignIn() {
             if (!supabaseClient) {
                 document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
                 return;
             }
             const btn = document.querySelector('.google-btn');
-            const originalHTML = btn.innerHTML;
             btn.innerHTML = 'Connecting...';
             btn.style.opacity = '0.7';
             btn.disabled = true;
@@ -2060,15 +2083,11 @@
                 });
                 if (error) {
                     document.getElementById('authError').textContent = error.message;
-                    btn.innerHTML = originalHTML;
-                    btn.style.opacity = '1';
-                    btn.disabled = false;
+                    resetGoogleBtn();
                 }
             } catch (e) {
                 document.getElementById('authError').textContent = 'Sign in failed. Please try again.';
-                btn.innerHTML = originalHTML;
-                btn.style.opacity = '1';
-                btn.disabled = false;
+                resetGoogleBtn();
             }
         }
 
