@@ -1,5 +1,5 @@
 -- ============================================
--- CRAWLDLE ANALYTICS DATABASE SCHEMA
+-- CRAWLDLE DATABASE SCHEMA
 -- Run these SQL statements in your Supabase dashboard
 -- ============================================
 
@@ -8,6 +8,7 @@
 CREATE TABLE IF NOT EXISTS gameplay_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id TEXT NOT NULL,
+    user_id UUID,
     game_date DATE NOT NULL,
     game_number INTEGER NOT NULL,
     crawler_of_day TEXT NOT NULL,
@@ -15,7 +16,6 @@ CREATE TABLE IF NOT EXISTS gameplay_sessions (
     game_status TEXT NOT NULL CHECK (game_status IN ('won', 'lost', 'incomplete')),
     first_guess TEXT,
     guesses_order JSONB,
-    emoji_grid TEXT NOT NULL,
     time_spent_seconds INTEGER,
     device_type TEXT NOT NULL,
     browser TEXT,
@@ -50,8 +50,7 @@ CREATE INDEX idx_affiliate_player_id ON affiliate_clicks(player_id);
 CREATE INDEX idx_affiliate_session_id ON affiliate_clicks(game_session_id);
 CREATE INDEX idx_affiliate_crawler ON affiliate_clicks(crawler_model);
 
--- Table 3: DAILY_STATS (Aggregate data)
--- Summary stats for each day (useful for dashboards)
+-- Table 3: DAILY_STATS (Aggregate data — populated by backend/admin only)
 CREATE TABLE IF NOT EXISTS daily_stats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     game_date DATE NOT NULL UNIQUE,
@@ -69,102 +68,27 @@ CREATE TABLE IF NOT EXISTS daily_stats (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add index for faster date queries
 CREATE INDEX idx_daily_stats_date ON daily_stats(game_date);
 
--- Table 4: PLAYER_STREAKS (Optional, for loyalty/engagement)
+-- Table 4: PLAYER_STREAKS
 -- Tracks consecutive daily plays and wins
 CREATE TABLE IF NOT EXISTS player_streaks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id TEXT NOT NULL UNIQUE,
+    user_id UUID,
+    username TEXT,
     current_streak INTEGER DEFAULT 0,
     longest_streak INTEGER DEFAULT 0,
     win_streak INTEGER DEFAULT 0,
+    total_wins INTEGER DEFAULT 0,
     last_played_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add index for player lookups
 CREATE INDEX idx_streak_player_id ON player_streaks(player_id);
-
--- ============================================
--- ROW LEVEL SECURITY (RLS) POLICIES (SECURE VERSION)
--- ============================================
-
--- Enable RLS on all tables
-ALTER TABLE gameplay_sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE affiliate_clicks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE daily_stats ENABLE ROW LEVEL SECURITY;
-ALTER TABLE player_streaks ENABLE ROW LEVEL SECURITY;
-
--- ============================================
--- GAMEPLAY_SESSIONS POLICIES
--- ============================================
--- Public READ (leaderboards, stats viewing)
--- Note: USING (true) for SELECT is intentional - for public read access
-CREATE POLICY "Public can view gameplay sessions"
-ON gameplay_sessions FOR SELECT
-USING (true);
-
--- Allow public INSERT (for saving player scores without login)
-CREATE POLICY "Public can insert gameplay sessions"
-ON gameplay_sessions FOR INSERT
-WITH CHECK (true);
-
--- ============================================
--- AFFILIATE_CLICKS POLICIES
--- ============================================
--- Public READ (for analytics dashboard)
-CREATE POLICY "Public can view affiliate clicks"
-ON affiliate_clicks FOR SELECT
-USING (true);
-
--- Allow public INSERT (for tracking clicks)
-CREATE POLICY "Public can insert affiliate clicks"
-ON affiliate_clicks FOR INSERT
-WITH CHECK (true);
-
--- ============================================
--- DAILY_STATS POLICIES
--- ============================================
--- Public READ (for daily stats display)
-CREATE POLICY "Public can view daily stats"
-ON daily_stats FOR SELECT
-USING (true);
-
--- Restrict INSERT/UPDATE to backend functions only
-CREATE POLICY "Only service role can insert daily stats"
-ON daily_stats FOR INSERT
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
-
-CREATE POLICY "Only service role can update daily stats"
-ON daily_stats FOR UPDATE
-USING (auth.role() = 'service_role' OR current_user = 'postgres')
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
-
--- ============================================
--- PLAYER_STREAKS POLICIES
--- ============================================
--- Public READ
-CREATE POLICY "Public can view player streaks"
-ON player_streaks FOR SELECT
-USING (true);
-
--- Restrict INSERT/UPDATE to backend functions only
-CREATE POLICY "Only service role can insert player streaks"
-ON player_streaks FOR INSERT
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
-
-CREATE POLICY "Only service role can update player streaks"
-ON player_streaks FOR UPDATE
-USING (auth.role() = 'service_role' OR current_user = 'postgres')
-WITH CHECK (auth.role() = 'service_role' OR current_user = 'postgres');
-
--- ============================================
--- 🔄 MIGRATION: Stats, Auth & Leaderboards
--- Run these AFTER the initial schema above
--- ============================================
+CREATE INDEX idx_streak_total_wins ON player_streaks(total_wins DESC);
+CREATE INDEX idx_streak_current ON player_streaks(current_streak DESC);
 
 -- Table 5: PROFILES (linked to Supabase Auth)
 CREATE TABLE IF NOT EXISTS profiles (
@@ -174,55 +98,85 @@ CREATE TABLE IF NOT EXISTS profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
--- Add columns to player_streaks for auth linkage & leaderboards
-ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES profiles(id);
-ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS username TEXT;
-ALTER TABLE player_streaks ADD COLUMN IF NOT EXISTS total_wins INTEGER DEFAULT 0;
-
--- Index for leaderboard queries
-CREATE INDEX IF NOT EXISTS idx_streak_total_wins ON player_streaks(total_wins DESC);
-CREATE INDEX IF NOT EXISTS idx_streak_current ON player_streaks(current_streak DESC);
-
 -- ============================================
--- PROFILES RLS POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================
+
+ALTER TABLE gameplay_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE affiliate_clicks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_stats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE player_streaks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Anyone can read profiles (for leaderboard display names)
-CREATE POLICY "Public can view profiles"
-ON profiles FOR SELECT
+-- ============================================
+-- GAMEPLAY_SESSIONS POLICIES
+-- Public read (community stats), public insert (save scores)
+-- No UPDATE/DELETE = denied by default
+-- ============================================
+CREATE POLICY "Anyone can view gameplay sessions"
+ON gameplay_sessions FOR SELECT
 USING (true);
 
--- Users can insert their own profile
+CREATE POLICY "Players can insert own sessions"
+ON gameplay_sessions FOR INSERT
+WITH CHECK (true);
+
+-- ============================================
+-- AFFILIATE_CLICKS POLICIES
+-- Insert-only for tracking; no public read
+-- ============================================
+CREATE POLICY "Anyone can insert affiliate clicks"
+ON affiliate_clicks FOR INSERT
+WITH CHECK (true);
+
+-- ============================================
+-- DAILY_STATS POLICIES
+-- Admin/service-role only for writes; no client access needed
+-- RLS enabled with no client-facing policies = fully locked
+-- ============================================
+CREATE POLICY "Only service role can manage daily stats"
+ON daily_stats FOR ALL
+USING (auth.role() = 'service_role')
+WITH CHECK (auth.role() = 'service_role');
+
+-- ============================================
+-- PLAYER_STREAKS POLICIES
+-- Public read (leaderboard), scoped insert/update
+-- ============================================
+CREATE POLICY "Anyone can view player streaks"
+ON player_streaks FOR SELECT
+USING (true);
+
+CREATE POLICY "Players can insert own streaks"
+ON player_streaks FOR INSERT
+WITH CHECK (true);
+
+-- Players can only update their own row (matched by auth user_id when logged in)
+CREATE POLICY "Players can update own streaks"
+ON player_streaks FOR UPDATE
+USING (
+    auth.uid() IS NOT NULL AND user_id = auth.uid()
+)
+WITH CHECK (
+    auth.uid() IS NOT NULL AND user_id = auth.uid()
+);
+
+-- ============================================
+-- PROFILES POLICIES
+-- Users can only read/update their own profile
+-- ============================================
+CREATE POLICY "Users can read own profile"
+ON profiles FOR SELECT
+USING (auth.uid() = id);
+
 CREATE POLICY "Users can insert own profile"
 ON profiles FOR INSERT
 WITH CHECK (auth.uid() = id);
 
--- Users can update their own profile
 CREATE POLICY "Users can update own profile"
 ON profiles FOR UPDATE
 USING (auth.uid() = id)
 WITH CHECK (auth.uid() = id);
-
--- ============================================
--- UPDATED PLAYER_STREAKS POLICIES
--- (Allow anon users to upsert via frontend)
--- ============================================
-
--- Drop existing restrictive insert/update policies
-DROP POLICY IF EXISTS "Only service role can insert player streaks" ON player_streaks;
-DROP POLICY IF EXISTS "Only service role can update player streaks" ON player_streaks;
-
--- Allow public insert (for saving streaks from frontend)
-CREATE POLICY "Public can insert player streaks"
-ON player_streaks FOR INSERT
-WITH CHECK (true);
-
--- Allow public update (for upserting streaks from frontend)
-CREATE POLICY "Public can update player streaks"
-ON player_streaks FOR UPDATE
-USING (true)
-WITH CHECK (true);
 
 -- ============================================
 -- AUTO-CREATE PROFILE ON SIGNUP (Trigger)
@@ -240,7 +194,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Drop trigger if exists, then create
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
