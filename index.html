@@ -1735,175 +1735,175 @@
     </div>
 
     <script>
-    (function() {
-        'use strict';
+        (function () {
+            'use strict';
 
-        // HTML entity escaping for defense-in-depth XSS protection
-        function escapeHTML(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        // ============================================
-        // SUPABASE CONFIGURATION (Safe initialization)
-        // ============================================
-        let supabaseClient = null;
-        let PLAYER_ID = null;
-
-        // Initialize Supabase once library loads
-        function initSupabase() {
-            if (window.supabase && !supabaseClient) {
-                const SUPABASE_URL = "https://jgcjzhtqsneafwtjnbil.supabase.co";
-                const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnY2p6aHRxc25lYWZ3dGpuYmlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTcwODUsImV4cCI6MjA4OTY5MzA4NX0.k3ZsYV230qUTwmW0Q8gjfVcSQ-FlfG6GiAvqSxvOXhM";
-                const { createClient } = window.supabase;
-                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ Supabase initialized');
+            // HTML entity escaping for defense-in-depth XSS protection
+            function escapeHTML(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
             }
-        }
 
-        // ============================================
-        // PLAYER ID & DEVICE DETECTION
-        // ============================================
+            // ============================================
+            // SUPABASE CONFIGURATION (Safe initialization)
+            // ============================================
+            let supabaseClient = null;
+            let PLAYER_ID = null;
 
-        // Generate or retrieve player ID
-        function getOrCreatePlayerId() {
-            if (!PLAYER_ID) {
-                let playerId = localStorage.getItem('crawldle_player_id');
-                if (!playerId) {
-                    // Use crypto-secure random for player ID generation
-                    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-                        playerId = 'player_' + crypto.randomUUID();
-                    } else {
-                        const arr = new Uint8Array(16);
-                        crypto.getRandomValues(arr);
-                        playerId = 'player_' + Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+            // Initialize Supabase once library loads
+            function initSupabase() {
+                if (window.supabase && !supabaseClient) {
+                    const SUPABASE_URL = "https://jgcjzhtqsneafwtjnbil.supabase.co";
+                    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnY2p6aHRxc25lYWZ3dGpuYmlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTcwODUsImV4cCI6MjA4OTY5MzA4NX0.k3ZsYV230qUTwmW0Q8gjfVcSQ-FlfG6GiAvqSxvOXhM";
+                    const { createClient } = window.supabase;
+                    supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    console.log('✅ Supabase initialized');
+                }
+            }
+
+            // ============================================
+            // PLAYER ID & DEVICE DETECTION
+            // ============================================
+
+            // Generate or retrieve player ID
+            function getOrCreatePlayerId() {
+                if (!PLAYER_ID) {
+                    let playerId = localStorage.getItem('crawldle_player_id');
+                    if (!playerId) {
+                        // Use crypto-secure random for player ID generation
+                        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                            playerId = 'player_' + crypto.randomUUID();
+                        } else {
+                            const arr = new Uint8Array(16);
+                            crypto.getRandomValues(arr);
+                            playerId = 'player_' + Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+                        }
+                        localStorage.setItem('crawldle_player_id', playerId);
                     }
-                    localStorage.setItem('crawldle_player_id', playerId);
+                    PLAYER_ID = playerId;
                 }
-                PLAYER_ID = playerId;
+                return PLAYER_ID;
             }
-            return PLAYER_ID;
-        }
 
-        // Call on page load
-        getOrCreatePlayerId();
-        // Try to init Supabase, with retry
-        initSupabase();
-        setTimeout(initSupabase, 500);
-        setTimeout(initSupabase, 1000);
+            // Call on page load
+            getOrCreatePlayerId();
+            // Try to init Supabase, with retry
+            initSupabase();
+            setTimeout(initSupabase, 500);
+            setTimeout(initSupabase, 1000);
 
-        // ============================================
-        // 📊 LOCAL STATS SYSTEM (localStorage)
-        // ============================================
-        const STATS_KEY = 'crawldle_stats';
-        const GAME_STATE_KEY = 'crawldle_game_state';
+            // ============================================
+            // 📊 LOCAL STATS SYSTEM (localStorage)
+            // ============================================
+            const STATS_KEY = 'crawldle_stats';
+            const GAME_STATE_KEY = 'crawldle_game_state';
 
-        function getDefaultStats() {
-            return { gamesPlayed: 0, wins: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: 0, guessDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
-        }
+            function getDefaultStats() {
+                return { gamesPlayed: 0, wins: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: 0, guessDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
+            }
 
-        function loadLocalStats() {
-            try {
-                const raw = localStorage.getItem(STATS_KEY);
-                if (raw) return JSON.parse(raw);
-            } catch (e) { console.error('Error loading stats:', e); }
-            return getDefaultStats();
-        }
+            function loadLocalStats() {
+                try {
+                    const raw = localStorage.getItem(STATS_KEY);
+                    if (raw) return JSON.parse(raw);
+                } catch (e) { console.error('Error loading stats:', e); }
+                return getDefaultStats();
+            }
 
-        function saveLocalStats(stats) {
-            try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
-            catch (e) { console.error('Error saving stats:', e); }
-        }
+            function saveLocalStats(stats) {
+                try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+                catch (e) { console.error('Error saving stats:', e); }
+            }
 
-        function updateLocalStats(isWin, numGuesses) {
-            const stats = loadLocalStats();
-            stats.gamesPlayed++;
-            if (isWin) {
-                stats.wins++;
-                stats.guessDistribution[numGuesses] = (stats.guessDistribution[numGuesses] || 0) + 1;
-                // Streak: check if last played day was yesterday or this is first game
-                if (stats.lastPlayedDay === 0 || stats.lastPlayedDay === gameDayNumber - 1) {
-                    stats.currentStreak++;
-                } else if (stats.lastPlayedDay !== gameDayNumber) {
-                    stats.currentStreak = 1;
+            function updateLocalStats(isWin, numGuesses) {
+                const stats = loadLocalStats();
+                stats.gamesPlayed++;
+                if (isWin) {
+                    stats.wins++;
+                    stats.guessDistribution[numGuesses] = (stats.guessDistribution[numGuesses] || 0) + 1;
+                    // Streak: check if last played day was yesterday or this is first game
+                    if (stats.lastPlayedDay === 0 || stats.lastPlayedDay === gameDayNumber - 1) {
+                        stats.currentStreak++;
+                    } else if (stats.lastPlayedDay !== gameDayNumber) {
+                        stats.currentStreak = 1;
+                    }
+                    if (stats.currentStreak > stats.maxStreak) stats.maxStreak = stats.currentStreak;
+                } else {
+                    stats.currentStreak = 0;
                 }
-                if (stats.currentStreak > stats.maxStreak) stats.maxStreak = stats.currentStreak;
-            } else {
-                stats.currentStreak = 0;
+                stats.lastPlayedDay = gameDayNumber;
+                saveLocalStats(stats);
+                return stats;
             }
-            stats.lastPlayedDay = gameDayNumber;
-            saveLocalStats(stats);
-            return stats;
-        }
 
-        // ============================================
-        // 💾 GAME STATE PERSISTENCE (page refresh)
-        // ============================================
-        function saveGameState() {
-            const state = {
-                gameDayNumber: gameDayNumber,
-                guesses: guessHistoryArray.slice(),
-                guessesCount: guessesCount,
-                gameOver: inputField ? inputField.disabled : false,
-                isWin: guessHistoryArray.length > 0 && guessHistoryArray[guessHistoryArray.length - 1] === dailyAnswerName
-            };
-            try { localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state)); }
-            catch (e) { console.error('Error saving game state:', e); }
-        }
+            // ============================================
+            // 💾 GAME STATE PERSISTENCE (page refresh)
+            // ============================================
+            function saveGameState() {
+                const state = {
+                    gameDayNumber: gameDayNumber,
+                    guesses: guessHistoryArray.slice(),
+                    guessesCount: guessesCount,
+                    gameOver: inputField ? inputField.disabled : false,
+                    isWin: guessHistoryArray.length > 0 && guessHistoryArray[guessHistoryArray.length - 1] === dailyAnswerName
+                };
+                try { localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state)); }
+                catch (e) { console.error('Error saving game state:', e); }
+            }
 
-        function loadGameState() {
-            try {
-                const raw = localStorage.getItem(GAME_STATE_KEY);
-                if (!raw) return null;
-                const state = JSON.parse(raw);
-                if (state.gameDayNumber !== gameDayNumber) {
-                    localStorage.removeItem(GAME_STATE_KEY);
+            function loadGameState() {
+                try {
+                    const raw = localStorage.getItem(GAME_STATE_KEY);
+                    if (!raw) return null;
+                    const state = JSON.parse(raw);
+                    if (state.gameDayNumber !== gameDayNumber) {
+                        localStorage.removeItem(GAME_STATE_KEY);
+                        return null;
+                    }
+                    return state;
+                } catch (e) {
+                    console.error('Error loading game state:', e);
                     return null;
                 }
-                return state;
-            } catch (e) {
-                console.error('Error loading game state:', e);
-                return null;
             }
-        }
 
-        function restoreGameState() {
-            const state = loadGameState();
-            if (!state || !state.guesses || state.guesses.length === 0) return;
+            function restoreGameState() {
+                const state = loadGameState();
+                if (!state || !state.guesses || state.guesses.length === 0) return;
 
-            // Rebuild the board silently (no animations)
-            state.guesses.forEach((guessName, index) => {
-                const guess = crawlerDB[guessName];
-                if (!guess) return;
-                guessesCount++;
-                guessHistoryArray.push(guessName);
+                // Rebuild the board silently (no animations)
+                state.guesses.forEach((guessName, index) => {
+                    const guess = crawlerDB[guessName];
+                    if (!guess) return;
+                    guessesCount++;
+                    guessHistoryArray.push(guessName);
 
-                // Rebuild the row without animation
-                const board = document.getElementById('gameBoard');
-                const row = document.createElement('div');
-                row.className = 'guess-row';
-                let rowEmojis = "";
+                    // Rebuild the row without animation
+                    const board = document.getElementById('gameBoard');
+                    const row = document.createElement('div');
+                    row.className = 'guess-row';
+                    let rowEmojis = "";
 
-                function checkTraitRestore(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
-                    let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
-                    if (guessedTrait === actualTrait) {
-                        rowEmojis += "🟩";
-                        return `<div class="box animate correct">${displayTrait}</div>`;
+                    function checkTraitRestore(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
+                        let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
+                        if (guessedTrait === actualTrait) {
+                            rowEmojis += "🟩";
+                            return `<div class="box animate correct">${displayTrait}</div>`;
+                        }
+                        if (isNumber) {
+                            const arrow = guessedTrait > actualTrait ? "⬇️" : "⬆️";
+                            rowEmojis += arrow;
+                            return `<div class="box animate wrong">${displayTrait} ${arrow}</div>`;
+                        }
+                        rowEmojis += "🟥";
+                        return `<div class="box animate wrong">${displayTrait}</div>`;
                     }
-                    if (isNumber) {
-                        const arrow = guessedTrait > actualTrait ? "⬇️" : "⬆️";
-                        rowEmojis += arrow;
-                        return `<div class="box animate wrong">${displayTrait} ${arrow}</div>`;
-                    }
-                    rowEmojis += "🟥";
-                    return `<div class="box animate wrong">${displayTrait}</div>`;
-                }
 
-                row.innerHTML = `
+                    row.innerHTML = `
                 <div class="box animate" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${escapeHTML(guessName)}</div>
                 ${checkTraitRestore(guess.brand, answer.brand)}
                 ${checkTraitRestore(guess.scale, answer.scale, true)}
@@ -1913,825 +1913,939 @@
                 ${checkTraitRestore(guess.price, answer.price, true, true)}
                 ${checkTraitRestore(guess.year, answer.year, true)}
             `;
-                board.appendChild(row);
-                guessHistoryEmoji.push(rowEmojis);
-            });
+                    board.appendChild(row);
+                    guessHistoryEmoji.push(rowEmojis);
+                });
 
-            // If game was over, lock input and show modal
-            if (state.gameOver) {
-                inputField.disabled = true;
-                // Small delay to let the UI settle
-                setTimeout(() => endGameRestore(state.isWin), 300);
-            }
-        }
-
-        // Separate endGame for restore (no re-saving stats or Supabase)
-        function endGameRestore(isWin) {
-            const modal = document.getElementById("gameOverModal");
-            const title = document.getElementById("modalTitle");
-            const text = document.getElementById("modalText");
-
-            if (isWin) {
-                title.innerText = "TRAIL CLEARED!";
-                title.style.color = "#2ecc71";
-                text.innerText = `You nailed it in ${guessesCount} tries!`;
-            } else {
-                title.innerText = "STUCK IN THE MUD!";
-                title.style.color = "#e74c3c";
-                text.innerText = `Out of guesses. The answer was the ${dailyAnswerName}.`;
+                // If game was over, lock input and show modal
+                if (state.gameOver) {
+                    inputField.disabled = true;
+                    // Small delay to let the UI settle
+                    setTimeout(() => endGameRestore(state.isWin), 300);
+                }
             }
 
-            // Update affiliate section
-            const crawlerNameEl = document.getElementById("crawlerName");
-            const affiliateLinkEl = document.getElementById("affiliateLink");
-            crawlerNameEl.innerText = dailyAnswerName;
-            const hasDirectLink = crawlerAffiliateLinks[dailyAnswerName] && crawlerAffiliateLinks[dailyAnswerName].trim() !== "";
-            const affiliateUrl = hasDirectLink ?
-                crawlerAffiliateLinks[dailyAnswerName] :
-                `https://amazon.com/s?k=${encodeURIComponent(dailyAnswerName + ' upgrades')}&tag=crawldle-20`;
-            affiliateLinkEl.href = affiliateUrl;
-            affiliateLinkEl.innerHTML = hasDirectLink ? "🛒 Buy on Amazon" : "🔧 View Upgrade Parts";
+            // Separate endGame for restore (no re-saving stats or Supabase)
+            function endGameRestore(isWin) {
+                const modal = document.getElementById("gameOverModal");
+                const title = document.getElementById("modalTitle");
+                const text = document.getElementById("modalText");
 
-            modal.style.display = "block";
-            // Show share header button
-            document.getElementById('shareHeaderBtn').classList.add('visible');
-        }
-        function showStatsModal() {
-            renderStatsModal();
-            document.getElementById('statsModal').style.display = 'block';
-        }
+                if (isWin) {
+                    title.innerText = "TRAIL CLEARED!";
+                    title.style.color = "#2ecc71";
+                    text.innerText = `You nailed it in ${guessesCount} tries!`;
+                } else {
+                    title.innerText = "STUCK IN THE MUD!";
+                    title.style.color = "#e74c3c";
+                    text.innerText = `Out of guesses. The answer was the ${dailyAnswerName}.`;
+                }
 
-        function hideStatsModal() {
-            document.getElementById('statsModal').style.display = 'none';
-        }
+                // Update affiliate section
+                const crawlerNameEl = document.getElementById("crawlerName");
+                const affiliateLinkEl = document.getElementById("affiliateLink");
+                crawlerNameEl.innerText = dailyAnswerName;
+                const hasDirectLink = crawlerAffiliateLinks[dailyAnswerName] && crawlerAffiliateLinks[dailyAnswerName].trim() !== "";
+                const affiliateUrl = hasDirectLink ?
+                    crawlerAffiliateLinks[dailyAnswerName] :
+                    `https://amazon.com/s?k=${encodeURIComponent(dailyAnswerName + ' upgrades')}&tag=crawldle-20`;
+                affiliateLinkEl.href = affiliateUrl;
+                affiliateLinkEl.innerHTML = hasDirectLink ? "🛒 Buy on Amazon" : "🔧 View Upgrade Parts";
 
-        function switchStatsTab(tabName, btnEl) {
-            // Toggle tabs
-            document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
-            btnEl.classList.add('active');
-            document.querySelectorAll('.stats-tab-content').forEach(c => c.classList.remove('active'));
-
-            if (tabName === 'yourStats') {
-                document.getElementById('yourStatsTab').classList.add('active');
-            } else {
-                document.getElementById('leaderboardTab').classList.add('active');
-                renderLeaderboardTab();
+                modal.style.display = "block";
+                // Show share header button
+                document.getElementById('shareHeaderBtn').classList.add('visible');
             }
-        }
+            function showStatsModal() {
+                renderStatsModal();
+                document.getElementById('statsModal').style.display = 'block';
+            }
 
-        function renderStatsModal() {
-            const stats = loadLocalStats();
-            document.getElementById('statGamesPlayed').textContent = stats.gamesPlayed;
-            const winPct = stats.gamesPlayed > 0 ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
-            document.getElementById('statWinPct').textContent = winPct + '%';
-            document.getElementById('statCurrentStreak').textContent = stats.currentStreak;
-            document.getElementById('statMaxStreak').textContent = stats.maxStreak;
+            function hideStatsModal() {
+                document.getElementById('statsModal').style.display = 'none';
+            }
 
-            // Guess distribution
-            const distContainer = document.getElementById('guessDistribution');
-            const maxCount = Math.max(1, ...Object.values(stats.guessDistribution));
-            let distHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                const count = stats.guessDistribution[i] || 0;
-                const pct = Math.max(5, (count / maxCount) * 100); // min 5% width for visibility
-                const isHighlight = (inputField && inputField.disabled && guessesCount === i && guessHistoryArray[guessesCount - 1] === dailyAnswerName);
-                distHTML += `
+            function switchStatsTab(tabName, btnEl) {
+                // Toggle tabs
+                document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+                btnEl.classList.add('active');
+                document.querySelectorAll('.stats-tab-content').forEach(c => c.classList.remove('active'));
+
+                if (tabName === 'yourStats') {
+                    document.getElementById('yourStatsTab').classList.add('active');
+                } else {
+                    document.getElementById('leaderboardTab').classList.add('active');
+                    renderLeaderboardTab();
+                }
+            }
+
+            function renderStatsModal() {
+                const stats = loadLocalStats();
+                document.getElementById('statGamesPlayed').textContent = stats.gamesPlayed;
+                const winPct = stats.gamesPlayed > 0 ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
+                document.getElementById('statWinPct').textContent = winPct + '%';
+                document.getElementById('statCurrentStreak').textContent = stats.currentStreak;
+                document.getElementById('statMaxStreak').textContent = stats.maxStreak;
+
+                // Guess distribution
+                const distContainer = document.getElementById('guessDistribution');
+                const maxCount = Math.max(1, ...Object.values(stats.guessDistribution));
+                let distHTML = '';
+                for (let i = 1; i <= 5; i++) {
+                    const count = stats.guessDistribution[i] || 0;
+                    const pct = Math.max(5, (count / maxCount) * 100); // min 5% width for visibility
+                    const isHighlight = (inputField && inputField.disabled && guessesCount === i && guessHistoryArray[guessesCount - 1] === dailyAnswerName);
+                    distHTML += `
                 <div class="dist-row">
                     <div class="dist-label">${i}</div>
                     <div class="dist-bar-bg">
                         <div class="dist-bar-fill${isHighlight ? ' highlight' : ''}" style="width: ${pct}%">${count}</div>
                     </div>
                 </div>`;
+                }
+                distContainer.innerHTML = distHTML;
             }
-            distContainer.innerHTML = distHTML;
-        }
 
-        // Close modals on outside click
-        document.addEventListener('click', function (e) {
-            if (e.target.id === 'statsModal') hideStatsModal();
-            if (e.target.id === 'authModal') hideAuthModal();
-        });
+            // Close modals on outside click
+            document.addEventListener('click', function (e) {
+                if (e.target.id === 'statsModal') hideStatsModal();
+                if (e.target.id === 'authModal') hideAuthModal();
+            });
 
-        // ============================================
-        // 👤 AUTH SYSTEM (Supabase Auth)
-        // ============================================
-        let currentUser = null;
+            // ============================================
+            // 👤 AUTH SYSTEM (Supabase Auth)
+            // ============================================
+            let currentUser = null;
 
-        function showAuthModal() {
-            document.getElementById('authModal').style.display = 'block';
-            document.getElementById('authError').textContent = '';
-            document.getElementById('authSuccess').textContent = '';
-        }
-
-        function hideAuthModal() {
-            document.getElementById('authModal').style.display = 'none';
-        }
-
-        function toggleEmailSection() {
-            const section = document.getElementById('authEmailSection');
-            const btn = document.getElementById('authExpandBtn');
-            if (section.classList.contains('expanded')) {
-                section.classList.remove('expanded');
-                btn.innerHTML = 'Email &amp; Password &#9660;';
-            } else {
-                section.classList.add('expanded');
-                btn.innerHTML = 'Email &amp; Password &#9650;';
+            function showAuthModal() {
+                document.getElementById('authModal').style.display = 'block';
+                document.getElementById('authError').textContent = '';
+                document.getElementById('authSuccess').textContent = '';
             }
-        }
 
-        function updateAuthUI(user) {
-            currentUser = user;
-            const formView = document.getElementById('authFormView');
-            const loggedInView = document.getElementById('authLoggedInView');
-            const authBtn = document.getElementById('authBtn');
-
-            if (user) {
-                formView.classList.add('hidden');
-                loggedInView.classList.add('active');
-                document.getElementById('authUserInfo').textContent = user.user_metadata?.full_name || user.email || 'Crawler';
-                authBtn.classList.add('logged-in');
-                authBtn.title = 'Profile';
-                // Load username from profiles
-                loadUsername(user);
-            } else {
-                formView.classList.remove('hidden');
-                loggedInView.classList.remove('active');
-                authBtn.classList.remove('logged-in');
-                authBtn.title = 'Sign In';
-                document.getElementById('usernameInput').value = '';
+            function hideAuthModal() {
+                document.getElementById('authModal').style.display = 'none';
             }
-        }
 
-        // Store original Google button HTML for reset
-        const googleBtnOriginalHTML = document.querySelector('.google-btn')?.innerHTML || 'Continue with Google';
-
-        function resetGoogleBtn() {
-            const btn = document.querySelector('.google-btn');
-            if (btn) {
-                btn.innerHTML = googleBtnOriginalHTML;
-                btn.style.opacity = '1';
-                btn.disabled = false;
+            function toggleEmailSection() {
+                const section = document.getElementById('authEmailSection');
+                const btn = document.getElementById('authExpandBtn');
+                if (section.classList.contains('expanded')) {
+                    section.classList.remove('expanded');
+                    btn.innerHTML = 'Email &amp; Password &#9660;';
+                } else {
+                    section.classList.add('expanded');
+                    btn.innerHTML = 'Email &amp; Password &#9650;';
+                }
             }
-        }
 
-        // Reset the Google sign-in button when user returns to the page
-        // (e.g., after cancelling the OAuth flow or pressing back)
-        document.addEventListener('visibilitychange', function () {
-            if (document.visibilityState === 'visible') {
-                resetGoogleBtn();
+            function updateAuthUI(user) {
+                currentUser = user;
+                const formView = document.getElementById('authFormView');
+                const loggedInView = document.getElementById('authLoggedInView');
+                const authBtn = document.getElementById('authBtn');
+
+                if (user) {
+                    formView.classList.add('hidden');
+                    loggedInView.classList.add('active');
+                    // Show email as account identifier (not full name)
+                    document.getElementById('authUserInfo').textContent = user.email || 'Crawler';
+                    authBtn.classList.add('logged-in');
+                    authBtn.title = 'Profile';
+                    // Load username from profiles & prompt if needed
+                    loadUsername(user);
+                } else {
+                    formView.classList.remove('hidden');
+                    loggedInView.classList.remove('active');
+                    authBtn.classList.remove('logged-in');
+                    authBtn.title = 'Sign In';
+                    document.getElementById('usernameInput').value = '';
+                }
             }
-        });
-        // Also reset on window focus (catches more cases like popup close)
-        window.addEventListener('focus', function () {
-            resetGoogleBtn();
-        });
 
-        async function handleGoogleSignIn() {
-            if (!supabaseClient) {
-                document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
-                return;
+            // Store original Google button HTML for reset
+            const googleBtnOriginalHTML = document.querySelector('.google-btn')?.innerHTML || 'Continue with Google';
+
+            function resetGoogleBtn() {
+                const btn = document.querySelector('.google-btn');
+                if (btn) {
+                    btn.innerHTML = googleBtnOriginalHTML;
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                }
             }
-            const btn = document.querySelector('.google-btn');
-            btn.innerHTML = 'Connecting...';
-            btn.style.opacity = '0.7';
-            btn.disabled = true;
 
-            try {
-                const { error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: window.location.origin + window.location.pathname }
-                });
-                if (error) {
-                    document.getElementById('authError').textContent = error.message;
+            // Reset the Google sign-in button when user returns to the page
+            // (e.g., after cancelling the OAuth flow or pressing back)
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
                     resetGoogleBtn();
                 }
-            } catch (e) {
-                document.getElementById('authError').textContent = 'Sign in failed. Please try again.';
+            });
+            // Also reset on window focus (catches more cases like popup close)
+            window.addEventListener('focus', function () {
                 resetGoogleBtn();
-            }
-        }
+            });
 
-        async function handleEmailSignUp() {
-            if (!supabaseClient) {
-                document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
-                return;
-            }
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            document.getElementById('authError').textContent = '';
-            document.getElementById('authSuccess').textContent = '';
-
-            if (!email || !password) {
-                document.getElementById('authError').textContent = 'Please enter email and password.';
-                return;
-            }
-            if (password.length < 6) {
-                document.getElementById('authError').textContent = 'Password must be at least 6 characters.';
-                return;
-            }
-
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                if (error) {
-                    document.getElementById('authError').textContent = error.message;
+            async function handleGoogleSignIn() {
+                if (!supabaseClient) {
+                    document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
                     return;
                 }
-                if (data.user && !data.user.confirmed_at) {
-                    document.getElementById('authSuccess').textContent = 'Check your email to confirm your account!';
-                } else if (data.user) {
-                    updateAuthUI(data.user);
-                    syncLocalToCloud(data.user);
-                    hideAuthModal();
-                }
-            } catch (e) {
-                document.getElementById('authError').textContent = 'Sign up failed. Please try again.';
-            }
-        }
+                const btn = document.querySelector('.google-btn');
+                btn.innerHTML = 'Connecting...';
+                btn.style.opacity = '0.7';
+                btn.disabled = true;
 
-        async function handleEmailLogin() {
-            if (!supabaseClient) {
-                document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
-                return;
-            }
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            document.getElementById('authError').textContent = '';
-            document.getElementById('authSuccess').textContent = '';
-
-            if (!email || !password) {
-                document.getElementById('authError').textContent = 'Please enter email and password.';
-                return;
-            }
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) {
-                    document.getElementById('authError').textContent = error.message;
-                    return;
-                }
-                updateAuthUI(data.user);
-                syncLocalToCloud(data.user);
-                hideAuthModal();
-            } catch (e) {
-                document.getElementById('authError').textContent = 'Login failed. Please try again.';
-            }
-        }
-
-        async function handleLogout() {
-            if (!supabaseClient) return;
-            try {
-                await supabaseClient.auth.signOut();
-                updateAuthUI(null);
-                hideAuthModal();
-            } catch (e) {
-                console.error('Logout error:', e);
-            }
-        }
-
-        async function checkAuthState() {
-            if (!supabaseClient) return;
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session?.user) {
-                    updateAuthUI(session.user);
-                }
-                // Listen for auth changes (e.g., Google OAuth redirect)
-                supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_IN' && session?.user) {
-                        updateAuthUI(session.user);
-                        syncLocalToCloud(session.user);
-                    } else if (event === 'SIGNED_OUT') {
-                        updateAuthUI(null);
+                try {
+                    const { error } = await supabaseClient.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: { redirectTo: window.location.origin + window.location.pathname }
+                    });
+                    if (error) {
+                        document.getElementById('authError').textContent = error.message;
+                        resetGoogleBtn();
                     }
-                });
-            } catch (e) {
-                console.error('Auth state check error:', e);
-            }
-        }
-
-        // Sync local stats to Supabase (upsert player_streaks)
-        async function syncLocalToCloud(user) {
-            if (!supabaseClient || !user) return;
-            try {
-                // Re-validate session before writing to DB
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session || session.user.id !== user.id) return;
-
-                const stats = loadLocalStats();
-                const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous';
-
-                const { error } = await supabaseClient
-                    .from('player_streaks')
-                    .upsert({
-                        player_id: PLAYER_ID,
-                        user_id: user.id,
-                        username: displayName,
-                        current_streak: stats.currentStreak,
-                        longest_streak: stats.maxStreak,
-                        win_streak: stats.currentStreak,
-                        total_wins: stats.wins,
-                        last_played_date: stats.lastPlayedDay > 0 ? new Date().toISOString().split('T')[0] : null
-                    }, { onConflict: 'player_id' });
-
-                if (error) {
-                    console.error('Sync error:', error.message);
-                } else {
-                    console.log('✅ Stats synced to cloud');
+                } catch (e) {
+                    document.getElementById('authError').textContent = 'Sign in failed. Please try again.';
+                    resetGoogleBtn();
                 }
-            } catch (e) {
-                console.error('Sync failed:', e);
             }
-        }
 
-        // ============================================
-        // 🏆 LEADERBOARD SYSTEM
-        // ============================================
-        let leaderboardLoaded = false;
+            async function handleEmailSignUp() {
+                if (!supabaseClient) {
+                    document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
+                    return;
+                }
+                const email = document.getElementById('authEmail').value.trim();
+                const password = document.getElementById('authPassword').value;
+                document.getElementById('authError').textContent = '';
+                document.getElementById('authSuccess').textContent = '';
 
-        async function renderLeaderboardTab() {
-            fetchDailyCommunityStats();
-            if (!leaderboardLoaded) {
-                await fetchLeaderboard('streak');
-                await fetchLeaderboard('wins');
-                leaderboardLoaded = true;
-            }
-        }
-
-        async function fetchDailyCommunityStats() {
-            if (!supabaseClient) {
-                document.getElementById('lbAvgGuesses').textContent = '--';
-                document.getElementById('lbWinRate').textContent = '--';
-                document.getElementById('lbTotalPlayers').textContent = '--';
-                return;
-            }
-            try {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const { data, error } = await supabaseClient
-                    .from('gameplay_sessions')
-                    .select('guess_count, game_status')
-                    .eq('game_date', todayStr);
-
-                if (error || !data || data.length === 0) {
-                    document.getElementById('lbAvgGuesses').textContent = '--';
-                    document.getElementById('lbWinRate').textContent = '--';
-                    document.getElementById('lbTotalPlayers').textContent = '0';
+                if (!email || !password) {
+                    document.getElementById('authError').textContent = 'Please enter email and password.';
+                    return;
+                }
+                if (password.length < 6) {
+                    document.getElementById('authError').textContent = 'Password must be at least 6 characters.';
                     return;
                 }
 
-                const total = data.length;
-                const wins = data.filter(d => d.game_status === 'won').length;
-                const avgGuesses = data.reduce((sum, d) => sum + d.guess_count, 0) / total;
-
-                document.getElementById('lbAvgGuesses').textContent = avgGuesses.toFixed(1);
-                document.getElementById('lbWinRate').textContent = Math.round((wins / total) * 100) + '%';
-                document.getElementById('lbTotalPlayers').textContent = total;
-            } catch (e) {
-                console.error('Community stats error:', e);
+                try {
+                    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                    if (error) {
+                        document.getElementById('authError').textContent = error.message;
+                        return;
+                    }
+                    if (data.user && !data.user.confirmed_at) {
+                        document.getElementById('authSuccess').textContent = 'Check your email to confirm your account!';
+                    } else if (data.user) {
+                        updateAuthUI(data.user);
+                        await syncCloudToLocal(data.user);
+                        await syncLocalToCloud(data.user);
+                        hideAuthModal();
+                    }
+                } catch (e) {
+                    document.getElementById('authError').textContent = 'Sign up failed. Please try again.';
+                }
             }
-        }
 
-        async function fetchLeaderboard(type) {
-            if (!supabaseClient) {
-                const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
-                document.getElementById(containerId).innerHTML = '<p class="lb-empty">Sign in to see leaderboards</p>';
-                return;
-            }
-            try {
-                const column = type === 'streak' ? 'current_streak' : 'total_wins';
-                const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
+            async function handleEmailLogin() {
+                if (!supabaseClient) {
+                    document.getElementById('authError').textContent = 'Connecting... please try again in a moment.';
+                    return;
+                }
+                const email = document.getElementById('authEmail').value.trim();
+                const password = document.getElementById('authPassword').value;
+                document.getElementById('authError').textContent = '';
+                document.getElementById('authSuccess').textContent = '';
 
-                const { data, error } = await supabaseClient
-                    .from('player_streaks')
-                    .select('player_id, username, current_streak, longest_streak, total_wins')
-                    .not('username', 'is', null)
-                    .order(column, { ascending: false })
-                    .limit(50);
-
-                if (error) {
-                    document.getElementById(containerId).innerHTML = '<p class="lb-empty">Could not load leaderboard</p>';
-                    console.error('Leaderboard error:', error);
+                if (!email || !password) {
+                    document.getElementById('authError').textContent = 'Please enter email and password.';
                     return;
                 }
 
-                if (!data || data.length === 0) {
-                    document.getElementById(containerId).innerHTML = '<p class="lb-empty">No data yet — be the first!</p>';
-                    return;
+                try {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        document.getElementById('authError').textContent = error.message;
+                        return;
+                    }
+                    updateAuthUI(data.user);
+                    await syncCloudToLocal(data.user);
+                    await syncLocalToCloud(data.user);
+                    hideAuthModal();
+                } catch (e) {
+                    document.getElementById('authError').textContent = 'Login failed. Please try again.';
                 }
-
-                let html = '<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>' +
-                    (type === 'streak' ? 'Streak' : 'Wins') + '</th></tr></thead><tbody>';
-
-                data.forEach((row, i) => {
-                    const isYou = row.player_id === PLAYER_ID;
-                    const rankClass = i === 0 ? 'lb-rank-1' : (i === 1 ? 'lb-rank-2' : (i === 2 ? 'lb-rank-3' : ''));
-                    const rowClass = isYou ? 'lb-you' : '';
-                    const value = type === 'streak' ? row.current_streak : row.total_wins;
-                    const displayName = row.username || 'Anonymous';
-                    html += `<tr class="${rowClass}"><td class="lb-rank ${rankClass}">${i + 1}</td><td>${displayName}${isYou ? ' (you)' : ''}</td><td>${value}</td></tr>`;
-                });
-
-                html += '</tbody></table>';
-                document.getElementById(containerId).innerHTML = html;
-            } catch (e) {
-                console.error('Leaderboard fetch error:', e);
-            }
-        }
-
-        // Detect device type
-        function getDeviceType() {
-            const ua = navigator.userAgent;
-            if (/mobile|android|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua.toLowerCase())) {
-                return 'mobile';
-            } else if (/ipad|android/i.test(ua.toLowerCase())) {
-                return 'tablet';
-            }
-            return 'desktop';
-        }
-
-        // Get browser and OS information
-        function getBrowserInfo() {
-            const ua = navigator.userAgent;
-            let browser = 'Unknown';
-            let os = 'Unknown';
-
-            // Detect Browser
-            if (ua.includes('Firefox')) browser = 'Firefox';
-            else if (ua.includes('Chrome')) browser = 'Chrome';
-            else if (ua.includes('Safari')) browser = 'Safari';
-            else if (ua.includes('Edge')) browser = 'Edge';
-            else if (ua.includes('Opera')) browser = 'Opera';
-
-            // Detect OS
-            if (ua.includes('Windows')) os = 'Windows';
-            else if (ua.includes('Mac')) os = 'MacOS';
-            else if (ua.includes('Linux')) os = 'Linux';
-            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-            else if (ua.includes('Android')) os = 'Android';
-
-            return { browser, os, userAgent: ua };
-        }
-
-        // Get country from IP (using free API)
-        async function getCountry() {
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                return data.country_name || 'Unknown';
-            } catch (error) {
-                console.log('Could not fetch country:', error);
-                return 'Unknown';
-            }
-        }
-
-        // Track gameplay session to Supabase
-        async function saveGameplaySession(isWin, firstGuess, guessesArray) {
-            if (!supabaseClient) {
-                console.log('⚠️  Supabase not ready yet, skipping save');
-                return null;
             }
 
-            try {
-                const browserInfo = getBrowserInfo();
-                const country = await getCountry();
-
-                const sessionData = {
-                    player_id: PLAYER_ID,
-                    user_id: currentUser?.id || null,
-                    game_date: new Date().toISOString().split('T')[0],
-                    game_number: gameDayNumber,
-                    crawler_of_day: dailyAnswerName,
-                    guess_count: guessesCount,
-                    game_status: isWin ? 'won' : (guessesCount >= maxGuesses ? 'lost' : 'incomplete'),
-                    first_guess: firstGuess,
-                    guesses_order: guessesArray,
-                    // emoji_grid: guessHistoryEmoji.join('\n'),
-                    time_spent_seconds: Math.floor((Date.now() - gameStartTime) / 1000),
-                    device_type: getDeviceType(),
-                    browser: browserInfo.browser,
-                    os: browserInfo.os,
-                    user_agent: browserInfo.userAgent,
-                    country: country,
-                    referrer: document.referrer || 'direct'
-                };
-
-                console.log('📤 Attempting to save session data:', sessionData);
-
-                const { data, error } = await supabaseClient
-                    .from('gameplay_sessions')
-                    .insert([sessionData])
-                    .select();
-
-                if (error) {
-                    console.error('❌ Supabase error saving gameplay session:', error.message, error.details);
-                    return null;
+            async function handleLogout() {
+                if (!supabaseClient) return;
+                try {
+                    await supabaseClient.auth.signOut();
+                    updateAuthUI(null);
+                    hideAuthModal();
+                } catch (e) {
+                    console.error('Logout error:', e);
                 }
-
-                if (!data || data.length === 0) {
-                    console.error('❌ No data returned from insert - table might not exist');
-                    return null;
-                }
-
-                console.log('✅ Gameplay session saved:', data);
-                return data[0]?.id;
-            } catch (error) {
-                console.error('❌ Failed to save gameplay session:', error.message);
             }
-        }
 
-        // Track affiliate link clicks
-        async function trackAffiliateClick(sessionId, crawlerModel, linkType, url) {
-            if (!supabaseClient) return;
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('affiliate_clicks')
-                    .insert([{
-                        player_id: PLAYER_ID,
-                        game_session_id: sessionId,
-                        crawler_model: crawlerModel,
-                        link_type: linkType,
-                        affiliate_url: url
-                    }]);
-
-                if (error) {
-                    console.error('Error tracking affiliate click:', error);
-                } else {
-                    console.log('✅ Affiliate click tracked');
-                }
-            } catch (error) {
-                console.error('Failed to track affiliate click:', error);
-            }
-        }
-
-        // ============================================
-        // CRAWLER DATABASE & GAME LOGIC
-        // ============================================
-        const crawlerDB = {
-            // --- TRAXXAS ---
-            "Traxxas TRX-4 Defender": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2017 },
-            "Traxxas TRX-4 Bronco": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2018 },
-            "Traxxas TRX-4 K5 Blazer": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2019 },
-            "Traxxas TRX-4 Sport": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 349, year: 2018 },
-            "Traxxas TRX-4 Crawler Kit": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 399, year: 2018 },
-            "Traxxas TRX-4 High Trail F-150": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2023 },
-            "Traxxas TRX-4 Nissan Pathfinder": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2025 },
-            "Traxxas TRX-6 Mercedes G 63": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 699, year: 2019 },
-            "Traxxas TRX-6 Flatbed Hauler": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 749, year: 2022 },
-            "Traxxas TRX-4M Bronco": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 179, year: 2022 },
-            "Traxxas TRX-4M High Trail K10": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 199, year: 2023 },
-
-            // --- AXIAL ---
-            "Axial SCX10 II Cherokee": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 409, year: 2016 },
-            "Axial SCX10 II Deadbolt": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 299, year: 2016 },
-            "Axial SCX10 II Trail Honcho": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 329, year: 2017 },
-            "Axial SCX10 III Coyote": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2025 },
-            "Axial SCX10 III Jeep CJ-7": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2023 },
-            "Axial SCX10 III Builder's Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "Kit", price: 269, year: 2026 },
-            "Axial SCX10 III Jeep JT Gladiator": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 579, year: 2020 },
-            "Axial SCX10 III Jeep JLU Wrangler": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2020 },
-            "Axial SCX10 III Base Camp": { brand: "Axial", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2022 },
-            "Axial SCX10 III Toyota SR5": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2026 },
-            "Axial SCX10 III Early Ford Bronco": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2021 },
-            "Axial SCX10 II UMG10 6x6": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 449, year: 2019 },
-            "Axial SCX10 Pro 4x4 Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 429, year: 2023 },
-            "Axial SCX6 Jeep JLU Wrangler": { brand: "Axial", scale: 6, axles: "Straight", licensed: "Yes", build: "RTR", price: 1199, year: 2021 },
-            "Axial UTB18 Capra": { brand: "Axial", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 279, year: 2022 },
-            "Axial SCX6 Trail Honcho": { brand: "Axial", scale: 6, axles: "Straight", licensed: "No", build: "RTR", price: 1199, year: 2022 },
-            "Axial SCX24 Deadbolt": { brand: "Axial", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 124, year: 2019 },
-            "Axial SCX24 Bronco": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 129, year: 2021 },
-            "Axial SCX24 Power Wagon": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
-            "Axial SCX24 Lexus GX 470": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2024 },
-            "Axial SCX24 Jeep Gladiator": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
-            "Axial SCX30 Ford Bronco": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
-            "Axial SCX30 Jeep Wrangler": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
-            "Axial SCX30 Chevy K10": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2026 },
-
-            // --- REDCAT ---
-            "Redcat Ascent 18 Apex": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 249, year: 2025 },
-            "Redcat Ascent 1/10": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2023 },
-            "Redcat Ascent Fusion": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 479, year: 2024 },
-            "Redcat Gen8 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 299, year: 2018 },
-            "Redcat Gen8 V2 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 379, year: 2020 },
-            "Redcat Gen9 Scout 800A": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2023 },
-            "Redcat Danchee Ridgerock": { brand: "Danchee", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 159, year: 2018 },
-            "Redcat Marksman 1/8": { brand: "Redcat", scale: 8, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
-            "Redcat Ascent 18 Scout II Brushless": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 199, year: 2025 },
-
-            // --- FMS / ROCHOBBY ---
-            "FMS FCX24 Power Wagon": { brand: "FMS", scale: 24, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2022 },
-            "FMS FCX24 Toyota Tacoma": { brand: "FMS", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 139, year: 2024 },
-            "FMS FCX24 K5 Blazer": { brand: "FMS", scale: 24, axles: "Portal", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
-            "FMS FCX18 LC80 Land Cruiser": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
-            "FMS FCX18 Chevy K10": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
-            "FMS FCX18 Hummer EV": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 179, year: 2024 },
-            "FMS FCX10 LC80 Land Cruiser": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 369, year: 2024 },
-            "FMS FCX10 K5 Blazer": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
-            "FMS Atlas 6x6": { brand: "FMS", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 139, year: 2020 },
-
-            // --- HOBBYPLUS ---
-            "HobbyPlus CR18P EVO PRO": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 155, year: 2023 },
-            "HobbyPlus CR18P Rock Van": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 129, year: 2024 },
-            "HobbyPlus CR18P T-Hunter": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 99, year: 2023 },
-            "HobbyPlus CR18P Pro Juice Up": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 189, year: 2024 },
-            "HobbyPlus CR18P Rushmore": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2024 },
-
-            // --- RC4WD ---
-            "RC4WD Trail Finder 2 Mojave": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2012 },
-            "RC4WD Gelande II D90": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2013 },
-            "RC4WD Trail Finder 2 Toyota 4Runner": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 569, year: 2021 },
-            "RC4WD Trail Finder 2 Toyota Pickup": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 529, year: 2023 },
-
-            // --- ELEMENT RC (now Associated Electrics) ---
-            "Element RC Enduro Sendero": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 429, year: 2019 }, // DISCONTINUED
-            "Element RC Enduro Ecto": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 }, // DISCONTINUED
-            "Element RC Enduro Knightrunner": { brand: "Element RC", scale: 10, axles: "IFS", licensed: "No", build: "RTR", price: 499, year: 2021 }, // DISCONTINUED
-
-            // --- CROSS RC ---
-            "Cross RC EMO X": { brand: "Cross RC", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 599, year: 2022 },
-            "Cross RC EMO NT": { brand: "Cross RC", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
-
-            // --- VANQUISH PRODUCTS ---
-            "Vanquish VS4-10 Origin Classic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 349, year: 2026 },
-            "Vanquish VS4-10 Origin Classic Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 849, year: 2026 },
-            "Vanquish VS4-10 Phoenix Portal": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 419, year: 2022 },
-            "Vanquish VS4-10 Phoenix Straight": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
-            "Vanquish VS4-10 Fordyce": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 459, year: 2023 },
-            "Vanquish VS4-10 Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 699, year: 2019 },
-            "Vanquish VS4-10 Ultra": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 749, year: 2019 },
-            "Vanquish VRD Carbon": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 429, year: 2023 },
-            "Vanquish VRD Stance": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
-            "Vanquish VRD Mullet": { brand: "Vanquish", scale: 10, axles: "Hybrid", licensed: "No", build: "Kit", price: 419, year: 2025 },
-            "Vanquish VRD Builders Kit": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 289, year: 2024 },
-            "Vanquish H10 Optic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 389, year: 2025 },
-            "Vanquish H10 Origin": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 3499, year: 2025 },
-
-            // --- BUDGET / CHINESE / OTHER ---
-            "MN Model MN82 Land Cruiser": { brand: "MN Model", scale: 12, axles: "Straight", licensed: "Yes", build: "RTR", price: 89, year: 2024 },
-            "WPL C24": { brand: "WPL", scale: 16, axles: "Straight", licensed: "No", build: "Kit", price: 69, year: 2018 },
-            "RGT EX86190 Rescuer": { brand: "RGT", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 429, year: 2022 },
-            "Yikong YK4102": { brand: "Yikong", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 429, year: 2020 },
-            "Yikong YK4083": { brand: "Yikong", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 529, year: 2022 }
-        };
-
-        // --- DAILY MIDNIGHT EST RESET LOGIC ---
-        // Calculate current date in EST (America/New_York) for consistent daily puzzle
-        function getESTDateString() {
-            return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // 'YYYY-MM-DD'
-        }
-        const launchDate = new Date('2026-03-12T00:00:00');
-        const estDateStr = getESTDateString();
-        const estToday = new Date(estDateStr + 'T00:00:00');
-        const gameDayNumber = Math.floor((estToday - launchDate) / (1000 * 60 * 60 * 24)) + 1;
-
-        // Mulberry32 seeded PRNG - uniform distribution, deterministic
-        function seededRandom(seed) {
-            let t = (seed + 0x6D2B79F5) | 0;
-            t = Math.imul(t ^ (t >>> 15), t | 1);
-            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-        }
-
-        const allCrawlerKeys = Object.keys(crawlerDB);
-        const dailyIndex = Math.floor(seededRandom(gameDayNumber) * allCrawlerKeys.length);
-        const dailyAnswerName = allCrawlerKeys[dailyIndex];
-        const answer = crawlerDB[dailyAnswerName];
-
-        // Calculate next reset time (next midnight EST = 5:00 AM UTC)
-        function getNextResetTime() {
-            const now = new Date();
-            // Get current EST date string, then compute next midnight EST as UTC
-            const estStr = getESTDateString();
-            const estMidnight = new Date(estStr + 'T00:00:00-05:00'); // midnight EST today
-            let nextReset = new Date(estMidnight.getTime() + 24 * 60 * 60 * 1000); // midnight EST tomorrow
-            if (nextReset <= now) {
-                nextReset = new Date(nextReset.getTime() + 24 * 60 * 60 * 1000);
-            }
-            return nextReset;
-        }
-
-        // Update countdown timer
-        function updateCountdown() {
-            const now = new Date();
-            const nextReset = getNextResetTime();
-            const timeDiff = nextReset - now;
-
-            const hours = String(Math.floor((timeDiff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
-            const minutes = String(Math.floor((timeDiff / (1000 * 60)) % 60)).padStart(2, '0');
-            const seconds = String(Math.floor((timeDiff / 1000) % 60)).padStart(2, '0');
-
-            document.getElementById('countdownHours').textContent = hours;
-            document.getElementById('countdownMinutes').textContent = minutes;
-            document.getElementById('countdownSeconds').textContent = seconds;
-        }
-
-        // Update countdown immediately and every second
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-
-        let guessesCount = 0;
-        const maxGuesses = 5;
-        const inputField = document.getElementById("guessInput");
-        const autocompleteList = document.getElementById("autocomplete-list");
-
-        // Array to secretly track the emoji grid!
-        let guessHistoryEmoji = [];
-        let guessHistoryArray = []; // Track all guesses for analytics
-        let gameStartTime = Date.now(); // Track time spent 
-
-        // Autocomplete Logic (Bulletproof Lenient Search)
-        inputField.addEventListener("input", function () {
-            let val = this.value;
-            autocompleteList.innerHTML = "";
-            if (!val.trim()) return false;
-
-            const rawTerms = val.toLowerCase().trim().split(/\s+/);
-
-            allCrawlerKeys.forEach(crawler => {
-                const crawlerLower = crawler.toLowerCase();
-                const crawlerLenient = crawlerLower.replace(/[-\s/]/g, "");
-
-                const isMatch = rawTerms.every(term => {
-                    const termLenient = term.replace(/[-\s/]/g, "");
-                    return crawlerLower.includes(term) || crawlerLenient.includes(termLenient);
-                });
-
-                if (isMatch) {
-                    const item = document.createElement("div");
-                    let displayText = crawler;
-                    rawTerms.forEach(term => {
-                        const escapeRegex = (s) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                        const regex = new RegExp("(" + escapeRegex(term) + ")", "gi");
-                        if (regex.test(displayText)) {
-                            displayText = displayText.replace(regex, "<strong>$1</strong>");
+            async function checkAuthState() {
+                if (!supabaseClient) return;
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session?.user) {
+                        updateAuthUI(session.user);
+                    }
+                    // Listen for auth changes (e.g., Google OAuth redirect)
+                    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                        if (event === 'SIGNED_IN' && session?.user) {
+                            updateAuthUI(session.user);
+                            // Pull cloud progress first, then push merged stats back
+                            await syncCloudToLocal(session.user);
+                            await syncLocalToCloud(session.user);
+                        } else if (event === 'SIGNED_OUT') {
+                            updateAuthUI(null);
                         }
                     });
+                } catch (e) {
+                    console.error('Auth state check error:', e);
+                }
+            }
 
-                    item.innerHTML = displayText;
+            // ============================================
+            // ☁️ CROSS-DEVICE SYNC: Pull cloud → local
+            // ============================================
+            async function syncCloudToLocal(user) {
+                if (!supabaseClient || !user) return;
+                try {
+                    // Look for existing cloud data linked to this auth user_id
+                    const { data, error } = await supabaseClient
+                        .from('player_streaks')
+                        .select('player_id, current_streak, longest_streak, total_wins, last_played_date')
+                        .eq('user_id', user.id);
 
-                    item.addEventListener("click", function () {
-                        inputField.value = crawler;
-                        autocompleteList.innerHTML = "";
-                        makeGuess(crawler);
+                    if (error || !data || data.length === 0) {
+                        console.log('No existing cloud data for this user');
+                        return;
+                    }
+
+                    // Merge: take the highest values across all rows for this user
+                    let cloudStreak = 0, cloudMaxStreak = 0, cloudWins = 0;
+                    let cloudPlayerId = null;
+                    data.forEach(row => {
+                        if (row.current_streak > cloudStreak) cloudStreak = row.current_streak;
+                        if (row.longest_streak > cloudMaxStreak) cloudMaxStreak = row.longest_streak;
+                        if (row.total_wins > cloudWins) cloudWins = row.total_wins;
+                        // Use the cloud player_id if it differs from local
+                        if (row.player_id !== PLAYER_ID) cloudPlayerId = row.player_id;
                     });
-                    autocompleteList.appendChild(item);
+
+                    // Merge with local stats (take higher values)
+                    const localStats = loadLocalStats();
+                    let changed = false;
+                    if (cloudStreak > localStats.currentStreak) {
+                        localStats.currentStreak = cloudStreak;
+                        changed = true;
+                    }
+                    if (cloudMaxStreak > localStats.maxStreak) {
+                        localStats.maxStreak = cloudMaxStreak;
+                        changed = true;
+                    }
+                    if (cloudWins > localStats.wins) {
+                        localStats.wins = cloudWins;
+                        changed = true;
+                    }
+                    // Ensure gamesPlayed >= wins
+                    if (localStats.gamesPlayed < localStats.wins) {
+                        localStats.gamesPlayed = localStats.wins;
+                        changed = true;
+                    }
+
+                    if (changed) {
+                        saveLocalStats(localStats);
+                        console.log('✅ Cloud stats merged into local:', localStats);
+                        // Refresh the stats modal if it's open
+                        renderStatsModal();
+                    }
+
+                    // If there was a cloud row with a different player_id, consolidate:
+                    // Delete the old device row and ensure this device's row carries the data
+                    if (cloudPlayerId && data.length > 1) {
+                        // Clean up duplicate rows — keep only the one matching current PLAYER_ID
+                        await supabaseClient
+                            .from('player_streaks')
+                            .delete()
+                            .eq('user_id', user.id)
+                            .neq('player_id', PLAYER_ID);
+                        console.log('🧹 Consolidated duplicate player_streaks rows');
+                    }
+                } catch (e) {
+                    console.error('Cloud-to-local sync failed:', e);
                 }
+            }
+
+            // ============================================
+            // ☁️ CROSS-DEVICE SYNC: Push local → cloud
+            // ============================================
+            async function syncLocalToCloud(user) {
+                if (!supabaseClient || !user) return;
+                try {
+                    // Re-validate session before writing to DB
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (!session || session.user.id !== user.id) return;
+
+                    const stats = loadLocalStats();
+
+                    // Get username from profiles (don't default to full_name)
+                    let displayName = null;
+                    try {
+                        const { data: profileData } = await supabaseClient
+                            .from('profiles')
+                            .select('username')
+                            .eq('id', user.id)
+                            .single();
+                        displayName = profileData?.username || null;
+                    } catch (e) { /* profiles might not exist yet */ }
+
+                    const { error } = await supabaseClient
+                        .from('player_streaks')
+                        .upsert({
+                            player_id: PLAYER_ID,
+                            user_id: user.id,
+                            username: displayName,
+                            current_streak: stats.currentStreak,
+                            longest_streak: stats.maxStreak,
+                            win_streak: stats.currentStreak,
+                            total_wins: stats.wins,
+                            last_played_date: stats.lastPlayedDay > 0 ? getESTDateString() : null
+                        }, { onConflict: 'player_id' });
+
+                    if (error) {
+                        console.error('Sync error:', error.message);
+                    } else {
+                        console.log('✅ Stats synced to cloud');
+                    }
+                } catch (e) {
+                    console.error('Sync failed:', e);
+                }
+            }
+
+            // ============================================
+            // 🏆 LEADERBOARD SYSTEM
+            // ============================================
+            let leaderboardLoaded = false;
+
+            async function renderLeaderboardTab() {
+                fetchDailyCommunityStats();
+                if (!leaderboardLoaded) {
+                    await fetchLeaderboard('streak');
+                    await fetchLeaderboard('wins');
+                    leaderboardLoaded = true;
+                }
+            }
+
+            async function fetchDailyCommunityStats() {
+                if (!supabaseClient) {
+                    document.getElementById('lbAvgGuesses').textContent = '--';
+                    document.getElementById('lbWinRate').textContent = '--';
+                    document.getElementById('lbTotalPlayers').textContent = '--';
+                    return;
+                }
+                try {
+                    const todayStr = getESTDateString(); // Use EST date, not UTC
+                    const { data, error } = await supabaseClient
+                        .from('gameplay_sessions')
+                        .select('guess_count, game_status')
+                        .eq('game_date', todayStr);
+
+                    if (error || !data || data.length === 0) {
+                        document.getElementById('lbAvgGuesses').textContent = '--';
+                        document.getElementById('lbWinRate').textContent = '--';
+                        document.getElementById('lbTotalPlayers').textContent = '0';
+                        return;
+                    }
+
+                    const total = data.length;
+                    const wins = data.filter(d => d.game_status === 'won').length;
+                    const avgGuesses = data.reduce((sum, d) => sum + d.guess_count, 0) / total;
+
+                    document.getElementById('lbAvgGuesses').textContent = avgGuesses.toFixed(1);
+                    document.getElementById('lbWinRate').textContent = Math.round((wins / total) * 100) + '%';
+                    document.getElementById('lbTotalPlayers').textContent = total;
+                } catch (e) {
+                    console.error('Community stats error:', e);
+                }
+            }
+
+            async function fetchLeaderboard(type) {
+                if (!supabaseClient) {
+                    const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
+                    document.getElementById(containerId).innerHTML = '<p class="lb-empty">Sign in to see leaderboards</p>';
+                    return;
+                }
+                try {
+                    const column = type === 'streak' ? 'current_streak' : 'total_wins';
+                    const containerId = type === 'streak' ? 'lbStreakTable' : 'lbWinsTable';
+
+                    const { data, error } = await supabaseClient
+                        .from('player_streaks')
+                        .select('player_id, username, current_streak, longest_streak, total_wins')
+                        .order(column, { ascending: false })
+                        .limit(50);
+
+                    if (error) {
+                        document.getElementById(containerId).innerHTML = '<p class="lb-empty">Could not load leaderboard</p>';
+                        console.error('Leaderboard error:', error);
+                        return;
+                    }
+
+                    if (!data || data.length === 0) {
+                        document.getElementById(containerId).innerHTML = '<p class="lb-empty">No data yet — be the first!</p>';
+                        return;
+                    }
+
+                    let html = '<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>' +
+                        (type === 'streak' ? 'Streak' : 'Wins') + '</th></tr></thead><tbody>';
+
+                    data.forEach((row, i) => {
+                        const isYou = row.player_id === PLAYER_ID;
+                        const rankClass = i === 0 ? 'lb-rank-1' : (i === 1 ? 'lb-rank-2' : (i === 2 ? 'lb-rank-3' : ''));
+                        const rowClass = isYou ? 'lb-you' : '';
+                        const value = type === 'streak' ? row.current_streak : row.total_wins;
+                        // Show fun default name if no custom username set
+                        const displayName = row.username || ('CrawlerFan' + (i + 1));
+                        html += `<tr class="${rowClass}"><td class="lb-rank ${rankClass}">${i + 1}</td><td>${escapeHTML(displayName)}${isYou ? ' (you)' : ''}</td><td>${value}</td></tr>`;
+                    });
+
+                    html += '</tbody></table>';
+                    document.getElementById(containerId).innerHTML = html;
+                } catch (e) {
+                    console.error('Leaderboard fetch error:', e);
+                }
+            }
+
+            // Detect device type
+            function getDeviceType() {
+                const ua = navigator.userAgent;
+                if (/mobile|android|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua.toLowerCase())) {
+                    return 'mobile';
+                } else if (/ipad|android/i.test(ua.toLowerCase())) {
+                    return 'tablet';
+                }
+                return 'desktop';
+            }
+
+            // Get browser and OS information
+            function getBrowserInfo() {
+                const ua = navigator.userAgent;
+                let browser = 'Unknown';
+                let os = 'Unknown';
+
+                // Detect Browser
+                if (ua.includes('Firefox')) browser = 'Firefox';
+                else if (ua.includes('Chrome')) browser = 'Chrome';
+                else if (ua.includes('Safari')) browser = 'Safari';
+                else if (ua.includes('Edge')) browser = 'Edge';
+                else if (ua.includes('Opera')) browser = 'Opera';
+
+                // Detect OS
+                if (ua.includes('Windows')) os = 'Windows';
+                else if (ua.includes('Mac')) os = 'MacOS';
+                else if (ua.includes('Linux')) os = 'Linux';
+                else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+                else if (ua.includes('Android')) os = 'Android';
+
+                return { browser, os, userAgent: ua };
+            }
+
+            // Get country from IP (using free API)
+            async function getCountry() {
+                try {
+                    const response = await fetch('https://ipapi.co/json/');
+                    const data = await response.json();
+                    return data.country_name || 'Unknown';
+                } catch (error) {
+                    console.log('Could not fetch country:', error);
+                    return 'Unknown';
+                }
+            }
+
+            // Track gameplay session to Supabase
+            async function saveGameplaySession(isWin, firstGuess, guessesArray) {
+                if (!supabaseClient) {
+                    console.log('⚠️  Supabase not ready yet, skipping save');
+                    return null;
+                }
+
+                try {
+                    const browserInfo = getBrowserInfo();
+                    const country = await getCountry();
+
+                    const sessionData = {
+                        player_id: PLAYER_ID,
+                        user_id: currentUser?.id || null,
+                        game_date: getESTDateString(), // Use EST date, not UTC
+                        game_number: gameDayNumber,
+                        crawler_of_day: dailyAnswerName,
+                        guess_count: guessesCount,
+                        game_status: isWin ? 'won' : (guessesCount >= maxGuesses ? 'lost' : 'incomplete'),
+                        first_guess: firstGuess,
+                        guesses_order: guessesArray,
+                        // emoji_grid: guessHistoryEmoji.join('\n'),
+                        time_spent_seconds: Math.floor((Date.now() - gameStartTime) / 1000),
+                        device_type: getDeviceType(),
+                        browser: browserInfo.browser,
+                        os: browserInfo.os,
+                        user_agent: browserInfo.userAgent,
+                        country: country,
+                        referrer: document.referrer || 'direct'
+                    };
+
+                    console.log('📤 Attempting to save session data:', sessionData);
+
+                    const { data, error } = await supabaseClient
+                        .from('gameplay_sessions')
+                        .insert([sessionData])
+                        .select();
+
+                    if (error) {
+                        console.error('❌ Supabase error saving gameplay session:', error.message, error.details);
+                        return null;
+                    }
+
+                    if (!data || data.length === 0) {
+                        console.error('❌ No data returned from insert - table might not exist');
+                        return null;
+                    }
+
+                    console.log('✅ Gameplay session saved:', data);
+                    return data[0]?.id;
+                } catch (error) {
+                    console.error('❌ Failed to save gameplay session:', error.message);
+                }
+            }
+
+            // Track affiliate link clicks
+            async function trackAffiliateClick(sessionId, crawlerModel, linkType, url) {
+                if (!supabaseClient) return;
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('affiliate_clicks')
+                        .insert([{
+                            player_id: PLAYER_ID,
+                            game_session_id: sessionId,
+                            crawler_model: crawlerModel,
+                            link_type: linkType,
+                            affiliate_url: url
+                        }]);
+
+                    if (error) {
+                        console.error('Error tracking affiliate click:', error);
+                    } else {
+                        console.log('✅ Affiliate click tracked');
+                    }
+                } catch (error) {
+                    console.error('Failed to track affiliate click:', error);
+                }
+            }
+
+            // ============================================
+            // CRAWLER DATABASE & GAME LOGIC
+            // ============================================
+            const crawlerDB = {
+                // --- TRAXXAS ---
+                "Traxxas TRX-4 Defender": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2017 },
+                "Traxxas TRX-4 Bronco": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2018 },
+                "Traxxas TRX-4 K5 Blazer": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2019 },
+                "Traxxas TRX-4 Sport": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 349, year: 2018 },
+                "Traxxas TRX-4 Crawler Kit": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 399, year: 2018 },
+                "Traxxas TRX-4 High Trail F-150": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 599, year: 2023 },
+                "Traxxas TRX-4 Nissan Pathfinder": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 549, year: 2025 },
+                "Traxxas TRX-6 Mercedes G 63": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 699, year: 2019 },
+                "Traxxas TRX-6 Flatbed Hauler": { brand: "Traxxas", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 749, year: 2022 },
+                "Traxxas TRX-4M Bronco": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 179, year: 2022 },
+                "Traxxas TRX-4M High Trail K10": { brand: "Traxxas", scale: 18, axles: "Straight", licensed: "Yes", build: "RTR", price: 199, year: 2023 },
+
+                // --- AXIAL ---
+                "Axial SCX10 II Cherokee": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 409, year: 2016 },
+                "Axial SCX10 II Deadbolt": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 299, year: 2016 },
+                "Axial SCX10 II Trail Honcho": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 329, year: 2017 },
+                "Axial SCX10 III Coyote": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2025 },
+                "Axial SCX10 III Jeep CJ-7": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2023 },
+                "Axial SCX10 III Builder's Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "Kit", price: 269, year: 2026 },
+                "Axial SCX10 III Jeep JT Gladiator": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 579, year: 2020 },
+                "Axial SCX10 III Jeep JLU Wrangler": { brand: "Axial", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 499, year: 2020 },
+                "Axial SCX10 III Base Camp": { brand: "Axial", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2022 },
+                "Axial SCX10 III Toyota SR5": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 499, year: 2026 },
+                "Axial SCX10 III Early Ford Bronco": { brand: "Axial", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2021 },
+                "Axial SCX10 II UMG10 6x6": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 449, year: 2019 },
+                "Axial SCX10 Pro 4x4 Kit": { brand: "Axial", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 429, year: 2023 },
+                "Axial SCX6 Jeep JLU Wrangler": { brand: "Axial", scale: 6, axles: "Straight", licensed: "Yes", build: "RTR", price: 1199, year: 2021 },
+                "Axial UTB18 Capra": { brand: "Axial", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 279, year: 2022 },
+                "Axial SCX6 Trail Honcho": { brand: "Axial", scale: 6, axles: "Straight", licensed: "No", build: "RTR", price: 1199, year: 2022 },
+                "Axial SCX24 Deadbolt": { brand: "Axial", scale: 24, axles: "Straight", licensed: "No", build: "RTR", price: 124, year: 2019 },
+                "Axial SCX24 Bronco": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 129, year: 2021 },
+                "Axial SCX24 Power Wagon": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
+                "Axial SCX24 Lexus GX 470": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 159, year: 2024 },
+                "Axial SCX24 Jeep Gladiator": { brand: "Axial", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 149, year: 2022 },
+                "Axial SCX30 Ford Bronco": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
+                "Axial SCX30 Jeep Wrangler": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2025 },
+                "Axial SCX30 Chevy K10": { brand: "Axial", scale: 30, axles: "Straight", licensed: "Yes", build: "RTR", price: 99, year: 2026 },
+
+                // --- REDCAT ---
+                "Redcat Ascent 18 Apex": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 249, year: 2025 },
+                "Redcat Ascent 1/10": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 339, year: 2023 },
+                "Redcat Ascent Fusion": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 479, year: 2024 },
+                "Redcat Gen8 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 299, year: 2018 },
+                "Redcat Gen8 V2 Scout II": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 379, year: 2020 },
+                "Redcat Gen9 Scout 800A": { brand: "Redcat", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2023 },
+                "Redcat Danchee Ridgerock": { brand: "Danchee", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 159, year: 2018 },
+                "Redcat Marksman 1/8": { brand: "Redcat", scale: 8, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
+                "Redcat Ascent 18 Scout II Brushless": { brand: "Redcat", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 199, year: 2025 },
+
+                // --- FMS / ROCHOBBY ---
+                "FMS FCX24 Power Wagon": { brand: "FMS", scale: 24, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2022 },
+                "FMS FCX24 Toyota Tacoma": { brand: "FMS", scale: 24, axles: "Straight", licensed: "Yes", build: "RTR", price: 139, year: 2024 },
+                "FMS FCX24 K5 Blazer": { brand: "FMS", scale: 24, axles: "Portal", licensed: "Yes", build: "RTR", price: 159, year: 2023 },
+                "FMS FCX18 LC80 Land Cruiser": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
+                "FMS FCX18 Chevy K10": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 189, year: 2023 },
+                "FMS FCX18 Hummer EV": { brand: "FMS", scale: 18, axles: "Portal", licensed: "Yes", build: "RTR", price: 179, year: 2024 },
+                "FMS FCX10 LC80 Land Cruiser": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 369, year: 2024 },
+                "FMS FCX10 K5 Blazer": { brand: "FMS", scale: 10, axles: "Portal", licensed: "Yes", build: "RTR", price: 399, year: 2024 },
+                "FMS Atlas 6x6": { brand: "FMS", scale: 18, axles: "Straight", licensed: "No", build: "RTR", price: 139, year: 2020 },
+
+                // --- HOBBYPLUS ---
+                "HobbyPlus CR18P EVO PRO": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 155, year: 2023 },
+                "HobbyPlus CR18P Rock Van": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 129, year: 2024 },
+                "HobbyPlus CR18P T-Hunter": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 99, year: 2023 },
+                "HobbyPlus CR18P Pro Juice Up": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 189, year: 2024 },
+                "HobbyPlus CR18P Rushmore": { brand: "HobbyPlus", scale: 18, axles: "Portal", licensed: "No", build: "RTR", price: 159, year: 2024 },
+
+                // --- RC4WD ---
+                "RC4WD Trail Finder 2 Mojave": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 499, year: 2012 },
+                "RC4WD Gelande II D90": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 549, year: 2013 },
+                "RC4WD Trail Finder 2 Toyota 4Runner": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 569, year: 2021 },
+                "RC4WD Trail Finder 2 Toyota Pickup": { brand: "RC4WD", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 529, year: 2023 },
+
+                // --- ELEMENT RC (now Associated Electrics) ---
+                "Element RC Enduro Sendero": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 429, year: 2019 }, // DISCONTINUED
+                "Element RC Enduro Ecto": { brand: "Element RC", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 }, // DISCONTINUED
+                "Element RC Enduro Knightrunner": { brand: "Element RC", scale: 10, axles: "IFS", licensed: "No", build: "RTR", price: 499, year: 2021 }, // DISCONTINUED
+
+                // --- CROSS RC ---
+                "Cross RC EMO X": { brand: "Cross RC", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 599, year: 2022 },
+                "Cross RC EMO NT": { brand: "Cross RC", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
+
+                // --- VANQUISH PRODUCTS ---
+                "Vanquish VS4-10 Origin Classic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 349, year: 2026 },
+                "Vanquish VS4-10 Origin Classic Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 849, year: 2026 },
+                "Vanquish VS4-10 Phoenix Portal": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 419, year: 2022 },
+                "Vanquish VS4-10 Phoenix Straight": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 479, year: 2021 },
+                "Vanquish VS4-10 Fordyce": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "RTR", price: 459, year: 2023 },
+                "Vanquish VS4-10 Pro": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 699, year: 2019 },
+                "Vanquish VS4-10 Ultra": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 749, year: 2019 },
+                "Vanquish VRD Carbon": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "Kit", price: 429, year: 2023 },
+                "Vanquish VRD Stance": { brand: "Vanquish", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 499, year: 2023 },
+                "Vanquish VRD Mullet": { brand: "Vanquish", scale: 10, axles: "Hybrid", licensed: "No", build: "Kit", price: 419, year: 2025 },
+                "Vanquish VRD Builders Kit": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 289, year: 2024 },
+                "Vanquish H10 Optic": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 389, year: 2025 },
+                "Vanquish H10 Origin": { brand: "Vanquish", scale: 10, axles: "Straight", licensed: "No", build: "Kit", price: 3499, year: 2025 },
+
+                // --- BUDGET / CHINESE / OTHER ---
+                "MN Model MN82 Land Cruiser": { brand: "MN Model", scale: 12, axles: "Straight", licensed: "Yes", build: "RTR", price: 89, year: 2024 },
+                "WPL C24": { brand: "WPL", scale: 16, axles: "Straight", licensed: "No", build: "Kit", price: 69, year: 2018 },
+                "RGT EX86190 Rescuer": { brand: "RGT", scale: 10, axles: "Straight", licensed: "Yes", build: "RTR", price: 429, year: 2022 },
+                "Yikong YK4102": { brand: "Yikong", scale: 10, axles: "Portal", licensed: "No", build: "RTR", price: 429, year: 2020 },
+                "Yikong YK4083": { brand: "Yikong", scale: 8, axles: "Portal", licensed: "No", build: "RTR", price: 529, year: 2022 }
+            };
+
+            // --- DAILY MIDNIGHT EST RESET LOGIC ---
+            // Calculate current date in EST (America/New_York) for consistent daily puzzle
+            function getESTDateString() {
+                return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // 'YYYY-MM-DD'
+            }
+            const launchDate = new Date('2026-03-12T00:00:00');
+            const estDateStr = getESTDateString();
+            const estToday = new Date(estDateStr + 'T00:00:00');
+            const gameDayNumber = Math.floor((estToday - launchDate) / (1000 * 60 * 60 * 24)) + 1;
+
+            // Mulberry32 seeded PRNG - uniform distribution, deterministic
+            function seededRandom(seed) {
+                let t = (seed + 0x6D2B79F5) | 0;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            }
+
+            const allCrawlerKeys = Object.keys(crawlerDB);
+            const dailyIndex = Math.floor(seededRandom(gameDayNumber) * allCrawlerKeys.length);
+            const dailyAnswerName = allCrawlerKeys[dailyIndex];
+            const answer = crawlerDB[dailyAnswerName];
+
+            // Calculate next reset time (next midnight Eastern, DST-aware)
+            function getNextResetTime() {
+                const now = new Date();
+                // Get tomorrow's date in Eastern timezone
+                const estStr = getESTDateString(); // today in ET: 'YYYY-MM-DD'
+                const [y, m, d] = estStr.split('-').map(Number);
+                const tomorrowET = new Date(Date.UTC(y, m - 1, d + 1)); // tomorrow date
+                const tomorrowStr = tomorrowET.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+                // Find the exact UTC time when it becomes midnight Eastern tomorrow
+                // by creating a date formatter and binary-searching (simple approach:
+                // check what UTC hour corresponds to midnight ET for that date)
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'America/New_York',
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: false
+                });
+
+                // Try UTC offsets -5 (EST) and -4 (EDT) to find correct one
+                for (const offset of [5, 4]) {
+                    const candidateUTC = new Date(tomorrowStr + 'T00:00:00Z');
+                    candidateUTC.setUTCHours(offset); // midnight ET = offset:00 UTC
+                    const parts = formatter.formatToParts(candidateUTC);
+                    const fHour = parts.find(p => p.type === 'hour')?.value;
+                    const fDay = parts.find(p => p.type === 'day')?.value;
+                    const fMonth = parts.find(p => p.type === 'month')?.value;
+                    const checkStr = `${parts.find(p => p.type === 'year')?.value}-${fMonth}-${fDay}`;
+                    if (fHour === '00' && checkStr === tomorrowStr && candidateUTC > now) {
+                        return candidateUTC;
+                    }
+                }
+                // Fallback: assume EST (-5)
+                const fallback = new Date(tomorrowStr + 'T05:00:00Z');
+                if (fallback <= now) fallback.setUTCDate(fallback.getUTCDate() + 1);
+                return fallback;
+            }
+
+            // Update countdown timer
+            function updateCountdown() {
+                const now = new Date();
+                const nextReset = getNextResetTime();
+                const timeDiff = nextReset - now;
+
+                const hours = String(Math.floor((timeDiff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+                const minutes = String(Math.floor((timeDiff / (1000 * 60)) % 60)).padStart(2, '0');
+                const seconds = String(Math.floor((timeDiff / 1000) % 60)).padStart(2, '0');
+
+                document.getElementById('countdownHours').textContent = hours;
+                document.getElementById('countdownMinutes').textContent = minutes;
+                document.getElementById('countdownSeconds').textContent = seconds;
+            }
+
+            // Update countdown immediately and every second
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+
+            let guessesCount = 0;
+            const maxGuesses = 5;
+            const inputField = document.getElementById("guessInput");
+            const autocompleteList = document.getElementById("autocomplete-list");
+
+            // Array to secretly track the emoji grid!
+            let guessHistoryEmoji = [];
+            let guessHistoryArray = []; // Track all guesses for analytics
+            let gameStartTime = Date.now(); // Track time spent 
+
+            // Autocomplete Logic (Bulletproof Lenient Search)
+            inputField.addEventListener("input", function () {
+                let val = this.value;
+                autocompleteList.innerHTML = "";
+                if (!val.trim()) return false;
+
+                const rawTerms = val.toLowerCase().trim().split(/\s+/);
+
+                allCrawlerKeys.forEach(crawler => {
+                    const crawlerLower = crawler.toLowerCase();
+                    const crawlerLenient = crawlerLower.replace(/[-\s/]/g, "");
+
+                    const isMatch = rawTerms.every(term => {
+                        const termLenient = term.replace(/[-\s/]/g, "");
+                        return crawlerLower.includes(term) || crawlerLenient.includes(termLenient);
+                    });
+
+                    if (isMatch) {
+                        const item = document.createElement("div");
+                        let displayText = crawler;
+                        rawTerms.forEach(term => {
+                            const escapeRegex = (s) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                            const regex = new RegExp("(" + escapeRegex(term) + ")", "gi");
+                            if (regex.test(displayText)) {
+                                displayText = displayText.replace(regex, "<strong>$1</strong>");
+                            }
+                        });
+
+                        item.innerHTML = displayText;
+
+                        item.addEventListener("click", function () {
+                            inputField.value = crawler;
+                            autocompleteList.innerHTML = "";
+                            makeGuess(crawler);
+                        });
+                        autocompleteList.appendChild(item);
+                    }
+                });
             });
-        });
 
-        document.addEventListener("click", function (e) {
-            if (e.target !== inputField) autocompleteList.innerHTML = "";
-        });
+            document.addEventListener("click", function (e) {
+                if (e.target !== inputField) autocompleteList.innerHTML = "";
+            });
 
-        function makeGuess(inputVal) {
-            const guess = crawlerDB[inputVal];
-            if (guessesCount >= maxGuesses) return; // Prevent extra guesses
+            function makeGuess(inputVal) {
+                const guess = crawlerDB[inputVal];
+                if (guessesCount >= maxGuesses) return; // Prevent extra guesses
 
-            guessesCount++;
-            guessHistoryArray.push(inputVal); // Track guess for analytics
+                guessesCount++;
+                guessHistoryArray.push(inputVal); // Track guess for analytics
 
-            // Determine if this is a game-ending guess
-            let isGameEnding = false;
-            let isWin = false;
+                // Determine if this is a game-ending guess
+                let isGameEnding = false;
+                let isWin = false;
 
-            if (inputVal === dailyAnswerName) {
-                isGameEnding = true;
-                isWin = true;
-            } else if (guessesCount >= maxGuesses) {
-                isGameEnding = true;
-                isWin = false;
-            }
-
-            renderGuess(inputVal, guess, isGameEnding, isWin);
-            inputField.value = '';
-            saveGameState(); // Persist game state for page refresh
-        }
-
-        function renderGuess(name, guess, isGameEnding = false, isWin = false) {
-            const board = document.getElementById('gameBoard');
-            const row = document.createElement('div');
-            row.className = 'guess-row';
-
-            let rowEmojis = ""; // Temporary string for this row's emojis
-
-            function checkTrait(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
-                let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
-
-                if (guessedTrait === actualTrait) {
-                    rowEmojis += "🟩";
-                    return `<div class="box correct">${displayTrait}</div>`;
+                if (inputVal === dailyAnswerName) {
+                    isGameEnding = true;
+                    isWin = true;
+                } else if (guessesCount >= maxGuesses) {
+                    isGameEnding = true;
+                    isWin = false;
                 }
 
-                if (isNumber) {
-                    const arrow = guessedTrait > actualTrait ? "⬇️" : "⬆️";
-                    rowEmojis += arrow;
-                    return `<div class="box wrong">${displayTrait} ${arrow}</div>`;
-                }
-
-                rowEmojis += "🟥";
-                return `<div class="box wrong">${displayTrait}</div>`;
+                renderGuess(inputVal, guess, isGameEnding, isWin);
+                inputField.value = '';
+                saveGameState(); // Persist game state for page refresh
             }
 
-            row.innerHTML = `
+            function renderGuess(name, guess, isGameEnding = false, isWin = false) {
+                const board = document.getElementById('gameBoard');
+                const row = document.createElement('div');
+                row.className = 'guess-row';
+
+                let rowEmojis = ""; // Temporary string for this row's emojis
+
+                function checkTrait(guessedTrait, actualTrait, isNumber = false, isPrice = false) {
+                    let displayTrait = escapeHTML(isPrice ? "$" + guessedTrait : guessedTrait);
+
+                    if (guessedTrait === actualTrait) {
+                        rowEmojis += "🟩";
+                        return `<div class="box correct">${displayTrait}</div>`;
+                    }
+
+                    if (isNumber) {
+                        const arrow = guessedTrait > actualTrait ? "⬇️" : "⬆️";
+                        rowEmojis += arrow;
+                        return `<div class="box wrong">${displayTrait} ${arrow}</div>`;
+                    }
+
+                    rowEmojis += "🟥";
+                    return `<div class="box wrong">${displayTrait}</div>`;
+                }
+
+                row.innerHTML = `
             <div class="box" style="background: linear-gradient(135deg, #3c3c3c 0%, #2a2a2a 100%); font-size: 12px; color: #f39c12;">${escapeHTML(name)}</div>
             ${checkTrait(guess.brand, answer.brand)}
             ${checkTrait(guess.scale, answer.scale, true)}
@@ -2742,412 +2856,425 @@
             ${checkTrait(guess.year, answer.year, true)}
         `;
 
-            board.appendChild(row);
+                board.appendChild(row);
 
-            // Animate boxes one by one with staggered delay
-            const boxes = row.querySelectorAll('.box');
-            const gridWrapper = document.querySelector('.grid-wrapper');
-            // Reset scroll to left before animation starts
-            gridWrapper.scrollLeft = 0;
-            const totalAnimationDuration = (boxes.length - 1) * 550 + 550;
+                // Animate boxes one by one with staggered delay
+                const boxes = row.querySelectorAll('.box');
+                const gridWrapper = document.querySelector('.grid-wrapper');
+                // Reset scroll to left before animation starts
+                gridWrapper.scrollLeft = 0;
+                const totalAnimationDuration = (boxes.length - 1) * 550 + 550;
 
-            // Calculate if scrolling is needed
-            const maxScroll = gridWrapper.scrollWidth - gridWrapper.clientWidth;
+                // Calculate if scrolling is needed
+                const maxScroll = gridWrapper.scrollWidth - gridWrapper.clientWidth;
 
-            if (maxScroll > 0) {
-                // Calculate what percentage of content fits on screen without scrolling
-                const visiblePercentage = gridWrapper.clientWidth / gridWrapper.scrollWidth;
-                // Start scrolling BEFORE boxes overflow (with a buffer of ~1 box duration)
-                const scrollStartTime = Math.max(0, (visiblePercentage * totalAnimationDuration) - 550);
+                if (maxScroll > 0) {
+                    // Calculate what percentage of content fits on screen without scrolling
+                    const visiblePercentage = gridWrapper.clientWidth / gridWrapper.scrollWidth;
+                    // Start scrolling BEFORE boxes overflow (with a buffer of ~1 box duration)
+                    const scrollStartTime = Math.max(0, (visiblePercentage * totalAnimationDuration) - 550);
 
-                const animationStartTime = Date.now();
+                    const animationStartTime = Date.now();
 
-                const animateScroll = () => {
-                    const elapsed = Date.now() - animationStartTime;
+                    const animateScroll = () => {
+                        const elapsed = Date.now() - animationStartTime;
 
-                    // Start scrolling earlier so new boxes are visible as they animate in
-                    if (elapsed >= scrollStartTime) {
-                        const scrollElapsed = elapsed - scrollStartTime;
-                        const remainingDuration = totalAnimationDuration - scrollStartTime;
-                        const progress = Math.min(scrollElapsed / remainingDuration, 1);
-                        gridWrapper.scrollLeft = progress * maxScroll;
-                    }
+                        // Start scrolling earlier so new boxes are visible as they animate in
+                        if (elapsed >= scrollStartTime) {
+                            const scrollElapsed = elapsed - scrollStartTime;
+                            const remainingDuration = totalAnimationDuration - scrollStartTime;
+                            const progress = Math.min(scrollElapsed / remainingDuration, 1);
+                            gridWrapper.scrollLeft = progress * maxScroll;
+                        }
 
-                    if (elapsed < totalAnimationDuration) {
-                        requestAnimationFrame(animateScroll);
-                    }
-                };
+                        if (elapsed < totalAnimationDuration) {
+                            requestAnimationFrame(animateScroll);
+                        }
+                    };
 
-                requestAnimationFrame(animateScroll);
-            }
-
-            boxes.forEach((box, index) => {
-                setTimeout(() => {
-                    box.classList.add('animate');
-                }, index * 550); // 550ms (0.55 second) stagger between each box
-            });
-
-            // If this is a game-ending guess, trigger endGame after all animations complete
-            if (isGameEnding) {
-                setTimeout(() => {
-                    endGame(isWin);
-                }, totalAnimationDuration);
-            }
-
-            guessHistoryEmoji.push(rowEmojis); // Save the emoji string to our global array
-        }
-
-        let currentGameSessionId = null; // Store session ID for affiliate tracking
-
-        // Affiliate links mapping - crawler name to Amazon affiliate URL
-        // Add your affiliate links here - leave empty strings for auto-generated searches
-        const crawlerAffiliateLinks = {
-            // --- TRAXXAS ---
-            "Traxxas TRX-4 Defender": "https://amzn.to/3PAOuxs",
-            "Traxxas TRX-4 Bronco": "https://amzn.to/47gFkfP",
-            "Traxxas TRX-4 K5 Blazer": "",
-            "Traxxas TRX-4 Sport": "https://amzn.to/3Pp8PG7",
-            "Traxxas TRX-4 Crawler Kit": "",
-            "Traxxas TRX-4 High Trail F-150": "https://amzn.to/4bG9uKC",
-            "Traxxas TRX-4 Nissan Pathfinder": "https://amzn.to/3NCxy9a",
-            "Traxxas TRX-6 Mercedes G 63": "https://amzn.to/4dD4U2h",
-            "Traxxas TRX-6 Flatbed Hauler": "https://amzn.to/4rNiBPE",
-            "Traxxas TRX-4M Bronco": "https://amzn.to/3NUq01I",
-            "Traxxas TRX-4M High Trail K10": "https://amzn.to/41kIDPu",
-
-            // --- AXIAL ---
-            "Axial SCX10 II Cherokee": "",
-            "Axial SCX10 II Deadbolt": "",
-            "Axial SCX10 II Trail Honcho": "",
-            "Axial SCX10 III Coyote": "https://amzn.to/4t16qjp",
-            "Axial SCX10 III Jeep CJ-7": "",
-            "Axial SCX10 III Builder's Kit": "https://amzn.to/47QmqMT",
-            "Axial SCX10 III Jeep JT Gladiator": "",
-            "Axial SCX10 III Jeep JLU Wrangler": "",
-            "Axial SCX10 III Base Camp": "https://amzn.to/3NP9eRE",
-            "Axial SCX10 III Toyota SR5": "",
-            "Axial SCX10 III Early Ford Bronco": "",
-            "Axial SCX10 II UMG10 6x6": "",
-            "Axial SCX10 Pro 4x4 Kit": "https://amzn.to/4bp8P1n",
-            "Axial SCX6 Jeep JLU Wrangler": "https://amzn.to/4lOLz0s",
-            "Axial UTB18 Capra": "https://amzn.to/4bGyPnW",
-            "Axial SCX6 Trail Honcho": "https://amzn.to/4bJ17OA",
-            "Axial SCX24 Deadbolt": "",
-            "Axial SCX24 Bronco": "https://amzn.to/3Ni9WH1",
-            "Axial SCX24 Power Wagon": "https://amzn.to/4bAqfH3",
-            "Axial SCX24 Lexus GX 470": "",
-            "Axial SCX24 Jeep Gladiator": "https://amzn.to/41io1az",
-            "Axial SCX30 Ford Bronco": "",
-            "Axial SCX30 Jeep Wrangler": "",
-            "Axial SCX30 Chevy K10": "",
-
-            // --- REDCAT ---
-            "Redcat Ascent 18 Apex": "https://amzn.to/4lMuvYX",
-            "Redcat Ascent 1/10": "https://amzn.to/4dBkUBS",
-            "Redcat Ascent Fusion": "https://amzn.to/40Os2U5",
-            "Redcat Gen8 Scout II": "",
-            "Redcat Gen8 V2 Scout II": "",
-            "Redcat Gen9 Scout 800A": "",
-            "Redcat Danchee Ridgerock": "https://amzn.to/4rNzHgn",
-            "Redcat Marksman 1/8": "",
-            "Redcat Ascent 18 Scout II Brushless": "https://amzn.to/3NTpfGb",
-
-            // --- FMS / ROCHOBBY ---
-            "FMS FCX24 Power Wagon": "https://amzn.to/3NTNqEv",
-            "FMS FCX24 Toyota Tacoma": "https://amzn.to/4uITLTT",
-            "FMS FCX24 K5 Blazer": "https://amzn.to/4lNp383",
-            "FMS FCX18 LC80 Land Cruiser": "https://amzn.to/4bDT9WH",
-            "FMS FCX18 Chevy K10": "https://amzn.to/4soMiaN",
-            "FMS FCX18 Hummer EV": "https://amzn.to/4bYwVjB",
-            "FMS FCX10 LC80 Land Cruiser": "https://amzn.to/4bAqO3D",
-            "FMS FCX10 K5 Blazer": "https://amzn.to/4bK8dCr",
-            "FMS Atlas 6x6": "",
-
-            // --- HOBBYPLUS ---
-            "HobbyPlus CR18P EVO PRO": "",
-            "HobbyPlus CR18P Rock Van": "https://amzn.to/47fXIFy",
-            "HobbyPlus CR18P T-Hunter": "https://amzn.to/4rLi5BC",
-            "HobbyPlus CR18P Pro Juice Up": "https://amzn.to/4rQEmxX",
-            "HobbyPlus CR18P Rushmore": "https://amzn.to/4rNAcXN",
-
-            // --- RC4WD ---
-            "RC4WD Trail Finder 2 Mojave": "",
-            "RC4WD Gelande II D90": "https://amzn.to/4bpU923",
-            "RC4WD Trail Finder 2 Toyota 4Runner": "https://amzn.to/40HOSwF",
-            "RC4WD Trail Finder 2 Toyota Pickup": "https://amzn.to/3PDtlml",
-
-            // --- ELEMENT RC (now Associated Electrics) ---
-            "Element RC Enduro Sendero": "https://amzn.to/4dAntEf",
-            "Element RC Enduro Ecto": "https://amzn.to/4bK8vcv",
-            "Element RC Enduro Knightrunner": "https://amzn.to/3PqqzAP",
-
-            // --- CROSS RC ---
-            "Cross RC EMO X": "",
-            "Cross RC EMO NT": "",
-
-            // --- VANQUISH PRODUCTS ---
-            "Vanquish VS4-10 Origin Classic": "",
-            "Vanquish VS4-10 Origin Classic Pro": "",
-            "Vanquish VS4-10 Phoenix Portal": "https://amzn.to/4bJ28WU",
-            "Vanquish VS4-10 Phoenix Straight": "",
-            "Vanquish VS4-10 Fordyce": "",
-            "Vanquish VS4-10 Pro": "",
-            "Vanquish VS4-10 Ultra": "",
-            "Vanquish VRD Carbon": "https://amzn.to/4rQs09p",
-            "Vanquish VRD Stance": "https://amzn.to/41m7rXi",
-            "Vanquish VRD Mullet": "",
-            "Vanquish VRD Builders Kit": "https://amzn.to/4rNaItE",
-            "Vanquish H10 Optic": "",
-            "Vanquish H10 Origin": "",
-
-            // --- BUDGET / CHINESE / OTHER ---
-            "MN Model MN82 Land Cruiser": "https://amzn.to/3NxU03u",
-            "WPL C24": "https://amzn.to/4lOMvSw",
-            "RGT EX86190 Rescuer": "",
-            "Yikong YK4102": "",
-            "Yikong YK4083": ""
-        };
-
-        function handleAffiliateClick(event) {
-            event.preventDefault();
-
-            // Track the click in Supabase
-            if (currentGameSessionId) {
-                trackAffiliateClick(
-                    currentGameSessionId,
-                    dailyAnswerName,
-                    'amazon',
-                    event.target.href
-                );
-            }
-
-            // Open the affiliate link
-            window.open(event.target.href, '_blank');
-        }
-
-        function endGame(isWin) {
-            const modal = document.getElementById("gameOverModal");
-            const title = document.getElementById("modalTitle");
-            const text = document.getElementById("modalText");
-
-            inputField.disabled = true; // Lock the search bar
-
-            if (isWin) {
-                title.innerText = "TRAIL CLEARED!";
-                title.style.color = "#2ecc71";
-                text.innerText = `You nailed it in ${guessesCount} tries!`;
-            } else {
-                title.innerText = "STUCK IN THE MUD!";
-                title.style.color = "#e74c3c";
-                text.innerText = `Out of guesses. The answer was the ${dailyAnswerName}.`;
-            }
-
-            // Update affiliate section
-            const crawlerNameEl = document.getElementById("crawlerName");
-            const affiliateLinkEl = document.getElementById("affiliateLink");
-
-            crawlerNameEl.innerText = dailyAnswerName;
-
-            // Get affiliate link, or use default search if not in mapping
-            const hasDirectLink = crawlerAffiliateLinks[dailyAnswerName] && crawlerAffiliateLinks[dailyAnswerName].trim() !== "";
-            const affiliateUrl = hasDirectLink ?
-                crawlerAffiliateLinks[dailyAnswerName] :
-                `https://amazon.com/s?k=${encodeURIComponent(dailyAnswerName + ' upgrades')}&tag=crawldle-20`;
-            affiliateLinkEl.href = affiliateUrl;
-
-            // Change button text based on whether we have a direct affiliate link
-            if (hasDirectLink) {
-                affiliateLinkEl.innerHTML = "🛒 Buy on Amazon";
-            } else {
-                affiliateLinkEl.innerHTML = "🔧 View Upgrade Parts";
-            }
-
-            // Save gameplay data to Supabase
-            const firstGuess = guessHistoryArray.length > 0 ? guessHistoryArray[0] : null;
-            saveGameplaySession(isWin, firstGuess, guessHistoryArray).then(sessionId => {
-                currentGameSessionId = sessionId;
-                console.log('Game session saved with ID:', sessionId);
-            });
-
-            // Update local stats & persist game state
-            updateLocalStats(isWin, guessesCount);
-            saveGameState();
-
-            // Sync to cloud if logged in
-            if (currentUser) {
-                syncLocalToCloud(currentUser);
-            }
-
-            setTimeout(() => { modal.style.display = "block"; }, 500);
-            // Show share header button after game ends
-            document.getElementById('shareHeaderBtn').classList.add('visible');
-        }
-
-        function shareResults() {
-            // Build the text block to copy
-            const gameStatus = guessesCount >= maxGuesses && guessHistoryEmoji[guessesCount - 1].includes("🟥") ? "X" : guessesCount;
-
-            let shareText = `🛻 Crawldle #${gameDayNumber}\n`;
-            shareText += `Attempts: ${gameStatus}/${maxGuesses}\n\n`;
-            shareText += guessHistoryEmoji.join('\n');
-
-            // ADD YOUR URL HERE!
-            shareText += `\n\nPlay here: https://crawldle.com`;
-
-            // Copy to device clipboard
-            navigator.clipboard.writeText(shareText).then(() => {
-                const btn = document.getElementById("shareBtn");
-                btn.innerText = "✅ COPIED!";
-                btn.style.backgroundColor = "#2ecc71";
-                setTimeout(() => {
-                    btn.innerText = "📋 Share Results";
-                    btn.style.backgroundColor = "#f39c12";
-                }, 2000);
-            }).catch(err => {
-                alert("Oops! Couldn't copy to clipboard.");
-            });
-        }
-
-        // ============================================
-        // ❌ DISMISS / REOPEN GAME OVER MODAL
-        // ============================================
-        function dismissGameOver() {
-            document.getElementById('gameOverModal').style.display = 'none';
-        }
-
-        function reopenGameOverModal() {
-            document.getElementById('gameOverModal').style.display = 'block';
-        }
-
-        // ============================================
-        // ℹ️ HOW TO PLAY MODAL
-        // ============================================
-        function showRulesModal() {
-            document.getElementById('rulesModal').style.display = 'block';
-        }
-
-        function hideRulesModal() {
-            document.getElementById('rulesModal').style.display = 'none';
-        }
-
-        // Close rules modal on outside click
-        document.getElementById('rulesModal').addEventListener('click', function (e) {
-            if (e.target === this) hideRulesModal();
-        });
-
-        // ============================================
-        // 🏷️ USERNAME: load & save
-        // ============================================
-        async function loadUsername(user) {
-            if (!supabaseClient || !user) return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('profiles')
-                    .select('username')
-                    .eq('id', user.id)
-                    .single();
-                if (data && data.username) {
-                    document.getElementById('usernameInput').value = data.username;
+                    requestAnimationFrame(animateScroll);
                 }
-            } catch (e) {
-                console.error('loadUsername error:', e);
-            }
-        }
 
-        async function saveUsername() {
-            if (!supabaseClient || !currentUser) {
-                setUsernameMsg('Sign in first', 'error');
-                return;
-            }
-            // Re-validate session before writing
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session || session.user.id !== currentUser.id) {
-                    setUsernameMsg('Session expired, please re-login', 'error');
-                    return;
+                boxes.forEach((box, index) => {
+                    setTimeout(() => {
+                        box.classList.add('animate');
+                    }, index * 550); // 550ms (0.55 second) stagger between each box
+                });
+
+                // If this is a game-ending guess, trigger endGame after all animations complete
+                if (isGameEnding) {
+                    setTimeout(() => {
+                        endGame(isWin);
+                    }, totalAnimationDuration);
                 }
-            } catch (e) {
-                setUsernameMsg('Session check failed', 'error');
-                return;
-            }
-            const input = document.getElementById('usernameInput');
-            const name = input.value.trim();
-            if (!name || name.length < 2) {
-                setUsernameMsg('At least 2 characters', 'error');
-                return;
-            }
-            if (name.length > 20) {
-                setUsernameMsg('Max 20 characters', 'error');
-                return;
+
+                guessHistoryEmoji.push(rowEmojis); // Save the emoji string to our global array
             }
 
-            try {
-                // Update profiles table
-                const { error: profileErr } = await supabaseClient
-                    .from('profiles')
-                    .update({ username: name })
-                    .eq('id', currentUser.id);
+            let currentGameSessionId = null; // Store session ID for affiliate tracking
 
-                if (profileErr) {
-                    if (profileErr.message.includes('unique') || profileErr.message.includes('duplicate')) {
-                        setUsernameMsg('Username taken, try another', 'error');
+            // Affiliate links mapping - crawler name to Amazon affiliate URL
+            // Add your affiliate links here - leave empty strings for auto-generated searches
+            const crawlerAffiliateLinks = {
+                // --- TRAXXAS ---
+                "Traxxas TRX-4 Defender": "https://amzn.to/3PAOuxs",
+                "Traxxas TRX-4 Bronco": "https://amzn.to/47gFkfP",
+                "Traxxas TRX-4 K5 Blazer": "",
+                "Traxxas TRX-4 Sport": "https://amzn.to/3Pp8PG7",
+                "Traxxas TRX-4 Crawler Kit": "",
+                "Traxxas TRX-4 High Trail F-150": "https://amzn.to/4bG9uKC",
+                "Traxxas TRX-4 Nissan Pathfinder": "https://amzn.to/3NCxy9a",
+                "Traxxas TRX-6 Mercedes G 63": "https://amzn.to/4dD4U2h",
+                "Traxxas TRX-6 Flatbed Hauler": "https://amzn.to/4rNiBPE",
+                "Traxxas TRX-4M Bronco": "https://amzn.to/3NUq01I",
+                "Traxxas TRX-4M High Trail K10": "https://amzn.to/41kIDPu",
+
+                // --- AXIAL ---
+                "Axial SCX10 II Cherokee": "",
+                "Axial SCX10 II Deadbolt": "",
+                "Axial SCX10 II Trail Honcho": "",
+                "Axial SCX10 III Coyote": "https://amzn.to/4t16qjp",
+                "Axial SCX10 III Jeep CJ-7": "",
+                "Axial SCX10 III Builder's Kit": "https://amzn.to/47QmqMT",
+                "Axial SCX10 III Jeep JT Gladiator": "",
+                "Axial SCX10 III Jeep JLU Wrangler": "",
+                "Axial SCX10 III Base Camp": "https://amzn.to/3NP9eRE",
+                "Axial SCX10 III Toyota SR5": "",
+                "Axial SCX10 III Early Ford Bronco": "",
+                "Axial SCX10 II UMG10 6x6": "",
+                "Axial SCX10 Pro 4x4 Kit": "https://amzn.to/4bp8P1n",
+                "Axial SCX6 Jeep JLU Wrangler": "https://amzn.to/4lOLz0s",
+                "Axial UTB18 Capra": "https://amzn.to/4bGyPnW",
+                "Axial SCX6 Trail Honcho": "https://amzn.to/4bJ17OA",
+                "Axial SCX24 Deadbolt": "",
+                "Axial SCX24 Bronco": "https://amzn.to/3Ni9WH1",
+                "Axial SCX24 Power Wagon": "https://amzn.to/4bAqfH3",
+                "Axial SCX24 Lexus GX 470": "",
+                "Axial SCX24 Jeep Gladiator": "https://amzn.to/41io1az",
+                "Axial SCX30 Ford Bronco": "",
+                "Axial SCX30 Jeep Wrangler": "",
+                "Axial SCX30 Chevy K10": "",
+
+                // --- REDCAT ---
+                "Redcat Ascent 18 Apex": "https://amzn.to/4lMuvYX",
+                "Redcat Ascent 1/10": "https://amzn.to/4dBkUBS",
+                "Redcat Ascent Fusion": "https://amzn.to/40Os2U5",
+                "Redcat Gen8 Scout II": "",
+                "Redcat Gen8 V2 Scout II": "",
+                "Redcat Gen9 Scout 800A": "",
+                "Redcat Danchee Ridgerock": "https://amzn.to/4rNzHgn",
+                "Redcat Marksman 1/8": "",
+                "Redcat Ascent 18 Scout II Brushless": "https://amzn.to/3NTpfGb",
+
+                // --- FMS / ROCHOBBY ---
+                "FMS FCX24 Power Wagon": "https://amzn.to/3NTNqEv",
+                "FMS FCX24 Toyota Tacoma": "https://amzn.to/4uITLTT",
+                "FMS FCX24 K5 Blazer": "https://amzn.to/4lNp383",
+                "FMS FCX18 LC80 Land Cruiser": "https://amzn.to/4bDT9WH",
+                "FMS FCX18 Chevy K10": "https://amzn.to/4soMiaN",
+                "FMS FCX18 Hummer EV": "https://amzn.to/4bYwVjB",
+                "FMS FCX10 LC80 Land Cruiser": "https://amzn.to/4bAqO3D",
+                "FMS FCX10 K5 Blazer": "https://amzn.to/4bK8dCr",
+                "FMS Atlas 6x6": "",
+
+                // --- HOBBYPLUS ---
+                "HobbyPlus CR18P EVO PRO": "",
+                "HobbyPlus CR18P Rock Van": "https://amzn.to/47fXIFy",
+                "HobbyPlus CR18P T-Hunter": "https://amzn.to/4rLi5BC",
+                "HobbyPlus CR18P Pro Juice Up": "https://amzn.to/4rQEmxX",
+                "HobbyPlus CR18P Rushmore": "https://amzn.to/4rNAcXN",
+
+                // --- RC4WD ---
+                "RC4WD Trail Finder 2 Mojave": "",
+                "RC4WD Gelande II D90": "https://amzn.to/4bpU923",
+                "RC4WD Trail Finder 2 Toyota 4Runner": "https://amzn.to/40HOSwF",
+                "RC4WD Trail Finder 2 Toyota Pickup": "https://amzn.to/3PDtlml",
+
+                // --- ELEMENT RC (now Associated Electrics) ---
+                "Element RC Enduro Sendero": "https://amzn.to/4dAntEf",
+                "Element RC Enduro Ecto": "https://amzn.to/4bK8vcv",
+                "Element RC Enduro Knightrunner": "https://amzn.to/3PqqzAP",
+
+                // --- CROSS RC ---
+                "Cross RC EMO X": "",
+                "Cross RC EMO NT": "",
+
+                // --- VANQUISH PRODUCTS ---
+                "Vanquish VS4-10 Origin Classic": "",
+                "Vanquish VS4-10 Origin Classic Pro": "",
+                "Vanquish VS4-10 Phoenix Portal": "https://amzn.to/4bJ28WU",
+                "Vanquish VS4-10 Phoenix Straight": "",
+                "Vanquish VS4-10 Fordyce": "",
+                "Vanquish VS4-10 Pro": "",
+                "Vanquish VS4-10 Ultra": "",
+                "Vanquish VRD Carbon": "https://amzn.to/4rQs09p",
+                "Vanquish VRD Stance": "https://amzn.to/41m7rXi",
+                "Vanquish VRD Mullet": "",
+                "Vanquish VRD Builders Kit": "https://amzn.to/4rNaItE",
+                "Vanquish H10 Optic": "",
+                "Vanquish H10 Origin": "",
+
+                // --- BUDGET / CHINESE / OTHER ---
+                "MN Model MN82 Land Cruiser": "https://amzn.to/3NxU03u",
+                "WPL C24": "https://amzn.to/4lOMvSw",
+                "RGT EX86190 Rescuer": "",
+                "Yikong YK4102": "",
+                "Yikong YK4083": ""
+            };
+
+            function handleAffiliateClick(event) {
+                event.preventDefault();
+
+                // Track the click in Supabase
+                if (currentGameSessionId) {
+                    trackAffiliateClick(
+                        currentGameSessionId,
+                        dailyAnswerName,
+                        'amazon',
+                        event.target.href
+                    );
+                }
+
+                // Open the affiliate link
+                window.open(event.target.href, '_blank');
+            }
+
+            function endGame(isWin) {
+                const modal = document.getElementById("gameOverModal");
+                const title = document.getElementById("modalTitle");
+                const text = document.getElementById("modalText");
+
+                inputField.disabled = true; // Lock the search bar
+
+                if (isWin) {
+                    title.innerText = "TRAIL CLEARED!";
+                    title.style.color = "#2ecc71";
+                    text.innerText = `You nailed it in ${guessesCount} tries!`;
+                } else {
+                    title.innerText = "STUCK IN THE MUD!";
+                    title.style.color = "#e74c3c";
+                    text.innerText = `Out of guesses. The answer was the ${dailyAnswerName}.`;
+                }
+
+                // Update affiliate section
+                const crawlerNameEl = document.getElementById("crawlerName");
+                const affiliateLinkEl = document.getElementById("affiliateLink");
+
+                crawlerNameEl.innerText = dailyAnswerName;
+
+                // Get affiliate link, or use default search if not in mapping
+                const hasDirectLink = crawlerAffiliateLinks[dailyAnswerName] && crawlerAffiliateLinks[dailyAnswerName].trim() !== "";
+                const affiliateUrl = hasDirectLink ?
+                    crawlerAffiliateLinks[dailyAnswerName] :
+                    `https://amazon.com/s?k=${encodeURIComponent(dailyAnswerName + ' upgrades')}&tag=crawldle-20`;
+                affiliateLinkEl.href = affiliateUrl;
+
+                // Change button text based on whether we have a direct affiliate link
+                if (hasDirectLink) {
+                    affiliateLinkEl.innerHTML = "🛒 Buy on Amazon";
+                } else {
+                    affiliateLinkEl.innerHTML = "🔧 View Upgrade Parts";
+                }
+
+                // Save gameplay data to Supabase
+                const firstGuess = guessHistoryArray.length > 0 ? guessHistoryArray[0] : null;
+                saveGameplaySession(isWin, firstGuess, guessHistoryArray).then(sessionId => {
+                    currentGameSessionId = sessionId;
+                    console.log('Game session saved with ID:', sessionId);
+                });
+
+                // Update local stats & persist game state
+                updateLocalStats(isWin, guessesCount);
+                saveGameState();
+
+                // Sync to cloud if logged in
+                if (currentUser) {
+                    syncLocalToCloud(currentUser);
+                }
+
+                setTimeout(() => { modal.style.display = "block"; }, 500);
+                // Show share header button after game ends
+                document.getElementById('shareHeaderBtn').classList.add('visible');
+            }
+
+            function shareResults() {
+                // Build the text block to copy
+                const gameStatus = guessesCount >= maxGuesses && guessHistoryEmoji[guessesCount - 1].includes("🟥") ? "X" : guessesCount;
+
+                let shareText = `🛻 Crawldle #${gameDayNumber}\n`;
+                shareText += `Attempts: ${gameStatus}/${maxGuesses}\n\n`;
+                shareText += guessHistoryEmoji.join('\n');
+
+                // ADD YOUR URL HERE!
+                shareText += `\n\nPlay here: https://crawldle.com`;
+
+                // Copy to device clipboard
+                navigator.clipboard.writeText(shareText).then(() => {
+                    const btn = document.getElementById("shareBtn");
+                    btn.innerText = "✅ COPIED!";
+                    btn.style.backgroundColor = "#2ecc71";
+                    setTimeout(() => {
+                        btn.innerText = "📋 Share Results";
+                        btn.style.backgroundColor = "#f39c12";
+                    }, 2000);
+                }).catch(err => {
+                    alert("Oops! Couldn't copy to clipboard.");
+                });
+            }
+
+            // ============================================
+            // ❌ DISMISS / REOPEN GAME OVER MODAL
+            // ============================================
+            function dismissGameOver() {
+                document.getElementById('gameOverModal').style.display = 'none';
+            }
+
+            function reopenGameOverModal() {
+                document.getElementById('gameOverModal').style.display = 'block';
+            }
+
+            // ============================================
+            // ℹ️ HOW TO PLAY MODAL
+            // ============================================
+            function showRulesModal() {
+                document.getElementById('rulesModal').style.display = 'block';
+            }
+
+            function hideRulesModal() {
+                document.getElementById('rulesModal').style.display = 'none';
+            }
+
+            // Close rules modal on outside click
+            document.getElementById('rulesModal').addEventListener('click', function (e) {
+                if (e.target === this) hideRulesModal();
+            });
+
+            // ============================================
+            // 🏷️ USERNAME: load & save
+            // ============================================
+            async function loadUsername(user) {
+                if (!supabaseClient || !user) return;
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', user.id)
+                        .single();
+                    if (data && data.username) {
+                        document.getElementById('usernameInput').value = data.username;
                     } else {
-                        setUsernameMsg('Error: ' + profileErr.message, 'error');
+                        // No custom username set — prompt the user
+                        document.getElementById('usernameInput').value = '';
+                        document.getElementById('usernameInput').placeholder = 'Choose a display name...';
+                        setUsernameMsg('⚡ Set a display name for the leaderboard!', 'success');
+                        // Auto-open the auth modal so user sees the prompt
+                        setTimeout(() => {
+                            showAuthModal();
+                            // Focus the username input
+                            setTimeout(() => document.getElementById('usernameInput').focus(), 300);
+                        }, 500);
                     }
+                } catch (e) {
+                    console.error('loadUsername error:', e);
+                }
+            }
+
+            async function saveUsername() {
+                if (!supabaseClient || !currentUser) {
+                    setUsernameMsg('Sign in first', 'error');
+                    return;
+                }
+                // Re-validate session before writing
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (!session || session.user.id !== currentUser.id) {
+                        setUsernameMsg('Session expired, please re-login', 'error');
+                        return;
+                    }
+                } catch (e) {
+                    setUsernameMsg('Session check failed', 'error');
+                    return;
+                }
+                const input = document.getElementById('usernameInput');
+                const name = input.value.trim();
+                if (!name || name.length < 2) {
+                    setUsernameMsg('At least 2 characters', 'error');
+                    return;
+                }
+                if (name.length > 20) {
+                    setUsernameMsg('Max 20 characters', 'error');
                     return;
                 }
 
-                // Also update player_streaks username
-                await supabaseClient
-                    .from('player_streaks')
-                    .update({ username: name })
-                    .eq('player_id', PLAYER_ID);
+                try {
+                    // Update profiles table
+                    const { error: profileErr } = await supabaseClient
+                        .from('profiles')
+                        .update({ username: name })
+                        .eq('id', currentUser.id);
 
-                setUsernameMsg('✅ Username saved!', 'success');
-            } catch (e) {
-                setUsernameMsg('Failed to save', 'error');
+                    if (profileErr) {
+                        if (profileErr.message.includes('unique') || profileErr.message.includes('duplicate')) {
+                            setUsernameMsg('Username taken, try another', 'error');
+                        } else {
+                            setUsernameMsg('Error: ' + profileErr.message, 'error');
+                        }
+                        return;
+                    }
+
+                    // Also update player_streaks username (use user_id since player_id may differ)
+                    await supabaseClient
+                        .from('player_streaks')
+                        .update({ username: name })
+                        .eq('user_id', currentUser.id);
+
+                    setUsernameMsg('✅ Username saved!', 'success');
+                    // Force leaderboard to refresh with new username
+                    leaderboardLoaded = false;
+                } catch (e) {
+                    setUsernameMsg('Failed to save', 'error');
+                }
             }
-        }
 
-        function setUsernameMsg(text, type) {
-            const el = document.getElementById('usernameMsg');
-            el.textContent = text;
-            el.className = 'username-msg ' + type;
-            setTimeout(() => { el.textContent = ''; el.className = 'username-msg'; }, 3000);
-        }
+            function setUsernameMsg(text, type) {
+                const el = document.getElementById('usernameMsg');
+                el.textContent = text;
+                el.className = 'username-msg ' + type;
+                setTimeout(() => { el.textContent = ''; el.className = 'username-msg'; }, 3000);
+            }
 
-        // ============================================
-        // 🚀 PAGE LOAD: Restore game state & check auth
-        // ============================================
-        restoreGameState();
-        // Check auth after Supabase is ready
-        setTimeout(checkAuthState, 1200);
+            // ============================================
+            // 🚀 PAGE LOAD: Restore game state & check auth
+            // ============================================
+            restoreGameState();
+            // Check auth after Supabase is ready
+            setTimeout(checkAuthState, 1200);
 
-        // First visit? Show how-to-play
-        if (!localStorage.getItem('crawldle_visited')) {
-            setTimeout(showRulesModal, 800);
-            localStorage.setItem('crawldle_visited', 'true');
-        }
+            // First visit? Show how-to-play
+            if (!localStorage.getItem('crawldle_visited')) {
+                setTimeout(showRulesModal, 800);
+                localStorage.setItem('crawldle_visited', 'true');
+            }
 
-        // Expose functions needed by inline onclick handlers
-        window.showRulesModal = showRulesModal;
-        window.hideRulesModal = hideRulesModal;
-        window.showStatsModal = showStatsModal;
-        window.hideStatsModal = hideStatsModal;
-        window.switchStatsTab = switchStatsTab;
-        window.showAuthModal = showAuthModal;
-        window.hideAuthModal = hideAuthModal;
-        window.handleGoogleSignIn = handleGoogleSignIn;
-        window.toggleEmailSection = toggleEmailSection;
-        window.handleEmailSignUp = handleEmailSignUp;
-        window.handleEmailLogin = handleEmailLogin;
-        window.handleLogout = handleLogout;
-        window.shareResults = shareResults;
-        window.dismissGameOver = dismissGameOver;
-        window.reopenGameOverModal = reopenGameOverModal;
-        window.saveUsername = saveUsername;
-        window.handleAffiliateClick = handleAffiliateClick;
-    })();
+            // Expose functions needed by inline onclick handlers
+            window.showRulesModal = showRulesModal;
+            window.hideRulesModal = hideRulesModal;
+            window.showStatsModal = showStatsModal;
+            window.hideStatsModal = hideStatsModal;
+            window.switchStatsTab = switchStatsTab;
+            window.showAuthModal = showAuthModal;
+            window.hideAuthModal = hideAuthModal;
+            window.handleGoogleSignIn = handleGoogleSignIn;
+            window.toggleEmailSection = toggleEmailSection;
+            window.handleEmailSignUp = handleEmailSignUp;
+            window.handleEmailLogin = handleEmailLogin;
+            window.handleLogout = handleLogout;
+            window.shareResults = shareResults;
+            window.dismissGameOver = dismissGameOver;
+            window.reopenGameOverModal = reopenGameOverModal;
+            window.saveUsername = saveUsername;
+            window.handleAffiliateClick = handleAffiliateClick;
+        })();
 
     </script>
 

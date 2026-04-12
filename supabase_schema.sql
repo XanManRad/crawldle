@@ -90,6 +90,11 @@ CREATE INDEX idx_streak_player_id ON player_streaks(player_id);
 CREATE INDEX idx_streak_total_wins ON player_streaks(total_wins DESC);
 CREATE INDEX idx_streak_current ON player_streaks(current_streak DESC);
 
+-- Unique partial index on user_id for cross-device sync
+-- Allows logged-in users to be identified by auth user_id across devices
+CREATE UNIQUE INDEX IF NOT EXISTS idx_player_streaks_user_id 
+ON player_streaks(user_id) WHERE user_id IS NOT NULL;
+
 -- Table 5: PROFILES (linked to Supabase Auth)
 CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
@@ -180,6 +185,7 @@ WITH CHECK (auth.uid() = id);
 
 -- ============================================
 -- AUTO-CREATE PROFILE ON SIGNUP (Trigger)
+-- Username is NULL so users are prompted to choose one
 -- ============================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -187,7 +193,7 @@ BEGIN
     INSERT INTO public.profiles (id, username, avatar_url)
     VALUES (
         NEW.id,
-        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
+        NULL,  -- Don't auto-set username; let user choose a display name
         NEW.raw_user_meta_data->>'avatar_url'
     );
     RETURN NEW;
@@ -198,3 +204,14 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- MIGRATION: Run these on existing databases
+-- ============================================
+
+-- 1. Null out existing usernames to force users to pick a new display name
+-- UPDATE profiles SET username = NULL;
+
+-- 2. Add unique partial index for cross-device sync (if not already created above)
+-- CREATE UNIQUE INDEX IF NOT EXISTS idx_player_streaks_user_id 
+-- ON player_streaks(user_id) WHERE user_id IS NOT NULL;
